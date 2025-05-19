@@ -116,6 +116,9 @@ class PostmanEmailLogs {
 		$config->set( 'CSS.Trusted', false ); // Block dangerous inline styles.
 		$config->set( 'CSS.AllowedProperties', null ); // NULL means allow all CSS properties.
 
+        // this library is removing display:flex how can we fix it?
+        $config->set( 'CSS.AllowTricky', true );
+
 		// Initialize HTMLPurifier.
 		$purifier = new HTMLPurifier( $config);
 
@@ -384,6 +387,12 @@ class PostmanEmailLogs {
 
             }
 
+            if( isset( $_GET['filter_by'] ) && !empty( $_GET['filter_by'] ) ) {
+
+                $query['filter_by'] = sanitize_text_field( $_GET['filter_by'] );
+
+            }
+
             $data = $logs_query->get_logs( $query );
 
             //WordPress Date, Time Format
@@ -477,11 +486,13 @@ class PostmanEmailLogs {
 		if( isset( $_POST['action'] ) && $_POST['action'] == 'ps-delete-email-logs' ) {
 
 			$args = array();
+            $deleted_all = false;
 
 			//Delete all
 			if( !isset( $_POST['selected'] ) ) {
 
 				$args = array( -1 );
+                $deleted_all = true;
 
 			}
 			//Delete selected
@@ -507,7 +518,8 @@ class PostmanEmailLogs {
 
 				$response = array(
 					'success' => true,
-					'message' => __( 'Logs deleted successfully', 'post-smtp' )
+					'message' => __( 'Logs deleted successfully', 'post-smtp' ),
+                    'deleted_all' => $deleted_all
 				);
 
 			}
@@ -515,7 +527,8 @@ class PostmanEmailLogs {
 
 				$response = array(
 					'success' => false,
-					'message' => __( 'Error deleting logs', 'post-smtp' )
+					'message' => __( 'Error deleting logs', 'post-smtp' ),
+                    'deleted_all' => $deleted_all
 				);
 
 			}
