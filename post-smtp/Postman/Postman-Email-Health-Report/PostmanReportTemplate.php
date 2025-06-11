@@ -13,8 +13,7 @@ if ( ! class_exists( 'PostmanReportTemplate' ) ) :
 		public function reporting_template( $duration, $from, $to, $logs ) {
 
 			$is_addonactivated = false;
-			if ( is_plugin_active( 'report-and-tracking-addon-premium/post-smtp-report-and-tracking.php' ) ) {
-
+			if ( class_exists( 'Post_SMTP_Report_And_Tracking' ) ) {
 				$is_addonactivated = true;
 			}
 
@@ -75,169 +74,188 @@ if ( ! class_exists( 'PostmanReportTemplate' ) ) :
 			$extension_url = 'https://postmansmtp.com/pricing/?utm_source=wordpress&utm_medium=email&utm_campaign=email_report&utm_content=report_and_tracking';
 			$disable_url = 'https://postmansmtp.com/pricing/?utm_source=wordpress&utm_medium=email&utm_campaign=email_report&utm_content=email_health_report/';
 
-			$body = '<!DOCTYPE html>
-<html>
-    <head>
-    </head>
-    <body>
-        <div style="background-color: #f1f1f1; padding: 15px 0; font-family: Arial, Helvetica, sans-serif;">
-            <div style="width: 490px; background-color: #ffffff; margin: 0 auto; padding: 1px 0; font-family: Arial, Helvetica, sans-serif;">
-                <div style="margin-top: 36px; text-align: center;">
-                    <img src="' . POST_SMTP_ASSETS . 'images/reporting/post_logo.png" />
-                </div>
-                <div style="width: 80%; margin: 0 auto; font-size: 12px; font-weight: 400; line-height: 15px; padding-top: 25px;">
-                    Hi ' . $admin_name . '
-                    <br>
-                    <br>
-                    Here is a quick overview of how your emails were performing in the past ' . $duration . '
-                </div>
-                <div style="width: 80%; margin: 0 auto; margin-top: 20px; display: flex !important;">
-                    <div style="display: inline-block; box-sizing: border-box; text-align: center; width: 100px; height: 120px; padding: 10px; border-radius: 5px; margin: 0 2px; background: #eafff2;">
-                        <div style="width: 40px; height: 40px; border-radius: 50%; display: inline-block;">
-                            <div style="display: inline-block; line-height: 44px;">
-                                <img src="' . POST_SMTP_ASSETS . 'images/reporting/total.png" style="width: 40px; height: 40px; border-radius: 50%;" />
-                            </div>
-                        </div>
-                        <div style="font-size: 12px; color: #151D48; padding: 5px;">
-                            Total
-                        </div>
-                        <div style="font-weight: 700; font-size: 27px; color: #151D48;">
-                            ' . $total . '
-                        </div>
-                    </div>
-                    <div style="display: inline-block; box-sizing: border-box; text-align: center; width: 100px; height: 120px; padding: 10px; border-radius: 5px; margin: 0 2px; background: #e8eff9;">
-                        <div style="width: 40px; height: 40px; border-radius: 50%; display: inline-block;">
-                            <div style="display: inline-block; line-height: 44px;">
-                                <img src="' . POST_SMTP_ASSETS . 'images/reporting/sent.png" style="width: 40px; height: 40px; border-radius: 50%;" />
-                            </div>
-                        </div>
-                        <div style="font-size: 12px; color: #151D48; padding: 5px;">
-                            Sent
-                        </div>
-                        <div style="font-weight: 700; font-size: 27px; color: #151D48;">
-                            ' . $sent . '
-                        </div>
-                    </div>
-                    <div style="display: inline-block; box-sizing: border-box; text-align: center; width: 100px; height: 120px; padding: 10px; border-radius: 5px; margin: 0 2px; background: #ffefe7;">
-                        <div style="width: 40px; height: 40px; border-radius: 50%; display: inline-block;">
-                            <div style="display: inline-block; line-height: 44px;">
-                                <img src="' . POST_SMTP_ASSETS . 'images/reporting/failed.png" style="width: 40px; height: 40px; border-radius: 50%;" />
-                            </div>
-                        </div>
-                        <div style="font-size: 12px; color: #151D48; padding: 5px;">
-                            Failed
-                        </div>
-                        <div style="font-weight: 700; font-size: 27px; color: #151D48;">
-                            ' . $failed . '
-                        </div>
-                    </div>';
-			if ( $is_addonactivated ) {
-				$body .= '<div style="display: inline-block; box-sizing: border-box; text-align: center; width: 100px; height: 120px; padding: 10px; border-radius: 5px; margin: 0 2px; background: #FFF5E9;">
-                            <div style="width: 40px; height: 40px; border-radius: 50%; display: inline-block; background: #FA8900;">
-                                <div style="display: inline-block; line-height: 44px;">
-                                    <img src="' . POST_SMTP_ASSETS . 'images/reporting/opened-pro.png" style="width: 40px; height: 40px; border-radius: 50%;" />
+            $body = '<div style=" width: 500px; margin: 0 auto; color: rgba(125, 152, 178, 1); font-size: 12px; font-family: Poppins, sans-serif;">
+        <table>
+            <tr>
+                <td style="padding: 20px 0;text-align: center;">
+                    <a href="https://postmansmtp.com"><img src="'.POST_SMTP_ASSETS.'images/reporting/post_logo.png"/></a>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;background: #F0F6FF;border-radius: 10px;">
+                    <h4 style=" margin: 0 0 5px 0;">Hi '.$admin_name.' </h4>
+                    <p style=" margin: 0 0 5px 0;">Here is a quick overview of how your emails were performing in the past '.$duration.'</p>
+                    <table style=" width: 100%; ">
+                        <tr>
+                            <td style=" width: 80px;">
+                                <div style="text-align: center; padding: 10px 10px; border-radius: 10px; background: #fff; color:#151D48; margin: 0 2px;">
+                                    <img src="'.POST_SMTP_ASSETS.'images/reporting/total.png" style="margin: 0 0 5px;width: 40px;height: 40px; "/>
+                                    <h5 style="margin:0;font-weight: 400;font-size: 10px;">Total Emails<br> <strong style="font-size: 20px; font-weight: 600;">'.$total.'</strong></h5>
                                 </div>
-                            </div>
-                            <div style="font-size: 12px; color: #151D48; padding: 5px;">
-                                Opened
-                            </div>
-                            <div style="font-weight: 700; font-size: 27px; color: #151D48;">
-                                '. $opened . '
-                            </div>
-                        </div>';
-			} else {
-				$body .= '<a href="' . $extension_url . '" target="_blank" style="text-decoration:none;">
-                            <div style="display: inline-block; box-sizing: border-box; text-align: center; width: 100px; height: 120px; padding: 10px; border-radius: 5px; margin: 0 2px; background: #ffa41c;">
-                                <div style="width: 40px; height: 40px; border-radius: 50%; display: inline-block;">
-                                    <div style="display: inline-block; line-height: 44px;">
-                                        <img src="' . POST_SMTP_ASSETS . 'images/reporting/opened.png" style="width: 40px; height: 40px; border-radius: 50%;" />
+                            </td>
+                            <td style=" width: 80px;">
+                                <div style=" text-align: center; padding: 10px 10px; border-radius: 10px; background: #fff; color:#151D48; margin: 0 2px;">
+                                    <img src="'.POST_SMTP_ASSETS.'images/reporting/sent.png" style="margin: 0 0 5px;width: 40px;height: 40px;"/>
+                                    <h5 style="margin:0;font-weight: 400;font-size: 10px;">Sent<br> <strong style="font-size: 20px; font-weight: 600;">'.$sent.'</strong></h5>
+                                </div>
+                            </td>
+                            <td style=" width: 80px;">
+                                <div style=" text-align: center; padding: 10px 10px; border-radius: 10px; background: #fff; color:#151D48; margin: 0 2px;">
+                                    <img src="'.POST_SMTP_ASSETS.'images/reporting/failed.png" style="margin: 0 0 5px;width: 40px;height: 40px;"/>
+                                    <h5 style="margin:0;font-weight: 400;font-size: 10px;">Failed <br> <strong style="font-size: 20px; font-weight: 600;">'.$failed.'</strong></h5>
+                                </div>
+                            </td>
+                            <td style=" width: 80px;">
+                                '.($is_addonactivated ? '
+                                <div style=" text-align: center; padding: 10px 10px; border-radius: 10px; background: #fff; color:#151D48; margin: 0 2px;">
+                                    <img src="'.POST_SMTP_ASSETS.'images/reporting/opened.png" style="margin: 0 0 5px;width: 40px;height: 40px;"/>
+                                    <h5 style="margin:0;font-weight: 400;font-size: 10px;">Opened<br><strong style="font-size: 20px; font-weight: 600;">'.$opened.'</strong></h5>
+                                </div>
+                                ' : '
+                                <a href="'.$extension_url.'" style="text-decoration: none;">
+                                    <div style="text-align: center; padding: 10px 10px; border-radius: 10px; background: #fbbc1f; color:#fff; margin: 0 2px;">
+                                        <img src="'.POST_SMTP_ASSETS.'images/reporting/opend.png" style="margin: 0 0 5px;width: 40px;height: 40px;"/>
+                                        <h5 style="margin:0;font-weight: 400;font-size: 10px;">Opened<br>
+                                        <img src="'.POST_SMTP_ASSETS.'images/reporting/lock.png" style="margin: 5px 0 0 0;"/>
                                     </div>
-                                </div>
-                                <div style="font-size: 12px; color: white; padding: 5px;">
-                                    Opened
-                                </div>
-                                <div style="font-weight: 700; font-size: 27px; color: #151D48;">
-                                    <img src="' . POST_SMTP_ASSETS . 'images/reporting/lock.png" />
-                                </div>
-                            </div>
-                        </a>';
-			}
-			if ( $is_addonactivated ) {
-				$body .= '</div>
-                            <div style="width: 110px; background-color: #375CAF; color: white; font-size: 11px; border-radius: 10px; margin-top: 17px; margin-left: 40%; text-align: center; padding: 2px;">
-                                <a href="' . $url . '" target="_blank" style="text-decoration: none; color: white;">View More Stats</a>
-                            </div>
-                            <div style="margin-top: 15px; height: 153px; width: 424px; border: 1px solid #CDCDCD; border-top: none; margin-left: 32px; border-radius: 10px;">
-                                <div style="width: 100%; height: 30px; background-color: #3A5EAF; color: white; border-top-left-radius: 8px; border-top-right-radius: 8px; font-size: 12px; display: flex; line-height: 32px;">
-                                    <span style="line-height: 20px; margin: 8px;"><img src="' . POST_SMTP_ASSETS . 'images/reporting/clock.png"></span> Last ' . $duration . ' top emails
-                                </div>';
-				if ( ! empty( $logs ) ) {
-					$body .= '<div>
-                                <table style="width:100%; border-bottom: 1px solid #CDCDCD; border-collapse: collapse;">
-                                    <tr>
-                                        <td style="font-size: 11px; color: #151D48; line-height: 22px; font-weight: 800; text-align: left; padding-left: 10px; border-bottom: 1px solid #CDCDCD; border-collapse: collapse;">Subject</td>
-                                        <td style="font-size: 11px; color: #151D48; line-height: 22px; font-weight: 800; border-bottom: 1px solid #CDCDCD; border-collapse: collapse; text-align: center;">Total</td>
-                                        <td style="font-size: 11px; color: #151D48; line-height: 22px; font-weight: 800; border-bottom: 1px solid #CDCDCD; border-collapse: collapse; text-align: center;">Sent</td>
-                                        <td style="font-size: 11px; color: #151D48; line-height: 22px; font-weight: 800; border-bottom: 1px solid #CDCDCD; border-collapse: collapse; text-align: center;">Failed</td>
-                                        <td style="font-size: 11px; color: #151D48; line-height: 22px; font-weight: 800; border-bottom: 1px solid #CDCDCD; border-collapse: collapse; text-align: center;">Opened</td>
-                                    </tr>';
-					$row = 1;
-					foreach ( $logs as $log ) {
-						if ( $row > 3 ) break;
-						$body .= '<tr>
-                                    <td style="text-align: left; padding-left: 10px; border-bottom: 1px solid #CDCDCD; border-collapse: collapse; line-height: 18px; font-size: 10px; color: #444A6D; font-weight: 600;"><div style="white-space: nowrap; width: 100px; overflow: hidden;text-overflow: ellipsis;">' . $log->subject . '</div></td>
-                                    <td style="border-bottom: 1px solid #CDCDCD; border-collapse: collapse; text-align: center; line-height: 18px; font-size: 10px; color: #444A6D; font-weight: 600;">' . $log->total . '</td>
-                                    <td style="border-bottom: 1px solid #CDCDCD; border-collapse: collapse; text-align: center; line-height: 18px; font-size: 10px; color: #444A6D; font-weight: 600;">' . $log->sent . '</td>
-                                    <td style="border-bottom: 1px solid #CDCDCD; border-collapse: collapse; text-align: center; line-height: 18px; font-size: 10px; color: #444A6D; font-weight: 600;">' . $log->failed . '</td>
-                                    <td style="border-bottom: 1px solid #CDCDCD; border-collapse: collapse; text-align: center; line-height: 18px; font-size: 10px; color: #444A6D; font-weight: 600;">' . $log->opened . '</td>
-                                </tr>';
-						$row++;
-					}
-					$body .= '</table>
-                                <div style="width: 110px; background-color: #375CAF; color: white; font-size: 11px; border-radius: 10px; position: relative; margin-left: 10px; margin-top: 8px; padding: 2px; text-align: center;">
-                                    <a href="' . $url . '" target="_blank" style="text-decoration: none; color: white;">View More Emails ></a>
-                                </div>
-                            </div>';
-				}
-				if ( empty( $logs ) ) {
-					$body .= '<div style="text-align: center; margin-top: 45px;">No emails were sent last ' . $duration . '</div>';
-				}
-				$body .= '</div>
-                            <div style="color: #375CAF; font-size: 12px; font-weight: 400; padding: 20px 0; width: 80%; margin: 0 auto;">
-                                This email was autogenerated and sent from <a href="' . $url . '" style="text-decoration:none; color: #375CAF;">' . $site_title . '</a>
-                            </div>';
-			} else {
-				$body .= '</div>
-                            <div style="width: 80%; margin: 0 auto; margin-top: 25px; height: 187px; border: 1px solid #CDCDCD; border-radius: 10px;">
-                                <div style="width: 100%; height: 30px; background-color: #E8EFF9; color: black; border-top-left-radius: 8px; border-top-right-radius: 8px; font-size: 12px; line-height: 32px; text-align:center;">
-                                    Unlock the Post SMTP Pro and enhance your email deliverability
-                                </div>
+                                </a>
+                                
+                                ').' 
+                                
+                            </td>
+                        </tr>
+                        '.($is_addonactivated ? '
+                        
+                         <tr>
+                            <td colspan="4" style=" text-align: center;">
+                                <a href="'.$url.'" style=" display: inline-block; background: #375CAF; margin: 20px 0 0; color: #fff; text-decoration: none; padding: 12px 25px; border-radius: 100px;">View More Stats</a>
+                            </td>
+                        </tr>
+                        
+                        ' : '' ).'
+                       
+                    </table>
+                </td>
+            </tr>
+            <!---->';
+
+            if(! post_smtp_has_pro()) {
+                $body .= '<tr>
+                <td>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="width: 60%;">
                                 <div>
-                                    <table style="width:100%; margin-top: 20px; border-bottom: none; border-collapse: collapse;">
-                                        <tr>
-                                            <td style="font-size: 11px; font-weight: 400; text-align: left; padding-left: 10px; color: #444A6D; padding-bottom: 4px; padding-top: 4px; border-color: transparent;"><span style="margin-right: 9px;"><img src="' . POST_SMTP_ASSETS . 'images/reporting/okay.png"></span>Open rate email tracking.</td>
-                                            <td style="font-size: 11px; font-weight: 400; text-align: left; padding-left: 10px; color: #444A6D; padding-bottom: 4px; padding-top: 4px; border-color: transparent;"><span style="margin-right: 9px;"><img src="' . POST_SMTP_ASSETS . 'images/reporting/okay.png"></span>Connect any mailer of your choice.</td>                            
-                                        </tr>
-                                        <tr>
-                                            <td style="font-size: 11px; font-weight: 400; text-align: left; padding-left: 10px; color: #444A6D; padding-bottom: 4px; padding-top: 4px; border-color: transparent;"><span style="margin-right: 9px;"><img src="' . POST_SMTP_ASSETS . 'images/reporting/okay.png"></span>Email quota scheduling.</td>
-                                            <td style="font-size: 11px; font-weight: 400; text-align: left; padding-left: 10px; color: #444A6D; padding-bottom: 4px; padding-top: 4px; border-color: transparent;"><span style="margin-right: 9px;"><img src="' . POST_SMTP_ASSETS . 'images/reporting/okay.png"></span>Multiple email failure alert options.</td>
-                                        </tr>
-                                        <tr>
-                                            <td style="font-size: 11px; font-weight: 400; text-align: left; padding-left: 10px; color: #444A6D; padding-bottom: 4px; padding-top: 4px; border-color: transparent;"><span style="margin-right: 9px;"><img src="' . POST_SMTP_ASSETS . 'images/reporting/okay.png"></span>Auto-resend failed emails.</td>
-                                            <td style="font-size: 11px; font-weight: 400; text-align: left; padding-left: 10px; color: #444A6D; padding-bottom: 4px; padding-top: 4px; border-color: transparent;"><span style="margin-right: 9px;"><img src="' . POST_SMTP_ASSETS . 'images/reporting/okay.png"></span>One-click email attachment resending.</td>
-                                        </tr>
-                                    </table>
-                                    <div style="width: 110px; background-color: #FA8900 !important; color: white; font-size: 11px; border-radius: 10px; margin-left: 35% !important; padding:3px !important; text-align: center;">
-                                        <a href="' . $extension_url . '" target="_blank" style="text-decoration: none; color: white;">Upgrade to PRO ></a>
-                                    </div>
+                                    <h3 style="color:rgba(33,74,114,1);font-size: 14px;">Unlock the Post SMTP Pro and enhance your email deliverability</h3>
+                                    <ul style="margin: 0; padding: 0; list-style: none;">
+                                        <li style="margin-bottom: 10px;">
+                                            <img src="'.POST_SMTP_ASSETS.'images/reporting/list-icon.png" alt="check" style="width: 14px;margin-bottom: -2px;">
+                                                More Pro Mailers 
+                                            <img style="margin-bottom: -5px;" src="'.POST_SMTP_ASSETS.'images/reporting/mailers.png" alt="mailers.png">
+                                        </li>
+                                        <li style="margin-bottom: 10px;">
+                                            <img src="'.POST_SMTP_ASSETS.'images/reporting/list-icon.png" alt="check" style="width: 14px;margin-bottom: -2px;">
+                                            All mobile app premium features. 
+                                        </li>
+                                        <li style="margin-bottom: 10px;">
+                                           <img src="'.POST_SMTP_ASSETS.'images/reporting/list-icon.png" alt="check" style="width: 14px;margin-bottom: -2px;">
+                                            Auto-resend failed emails. 
+                                        </li>
+                                        <li style="margin-bottom: 10px;">
+                                           <img src="'.POST_SMTP_ASSETS.'images/reporting/list-icon.png" alt="check" style="width: 14px;margin-bottom: -2px;">
+                                            SMS Failure Notification.
+                                        </li>
+                                    </ul>
+                                    <a href="'.$extension_url.'" style="border: 1px solid rgba(58, 94, 175, 1); color: rgba(58, 94, 175, 1); background: rgba(240, 246, 255, 1); text-decoration: none; padding: 12px 30px; margin: 15px 0; display:inline-block; border-radius: 100px;">Learn more about PRO <img src="'.POST_SMTP_ASSETS.'images/reporting/btn-arrow.png"  style="margin: 0 0 0 5px;"/>
+                                    </a>
                                 </div>
-                            </div>
-                            <div style="color: #375CAF; font-size: 12px; font-weight: 400; padding: 20px 0; width: 80%; margin: 0 auto;">
-                                This email was auto-generated. You can disable it anytime you want. <a href="' . $disable_url . '" target="_blank" style="color: #375CAF;">Learn how?</a>
-                            </div>';
-			}
-			$body .= '</div>
-        </div>
+                            </td>
+                            <td style="width: 40%; text-align: center;">
+                                <div>
+                                    <img src="'.POST_SMTP_ASSETS.'images/reporting/email-fav.png" alt="email-fav.png">
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+           <!---->';
+            }
+            
+            if(!empty($logs)) {
+                $logs_html = '';
+                $logs_html .= '<!-- loop-->';
+                $row = 1;
+                foreach ( $logs as $log ) {
+                     // Let break if greater than 3.
+                    if ( $row > 3 ) {
+                        break;
+                    } else { 
+                        $logs_html .= '
+                         <tr style="background: #F0F6FF;">
+                            <td style="padding:10px;color:#444a6d;font-size: 12px;font-weight:400;text-align: left;">'.$log->subject.'</td>
+                            <td style="padding: 10px;"></td>
+                            <td style="padding: 10px;"></td>
+                            <td style="padding: 10px;"></td>
+                            <td style="padding: 10px;"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td style="padding: 10px; text-align: center;">'.$log->total.'</td>
+                            <td style="padding: 10px; text-align: center;">'.$log->sent.'</td>
+                            <td style="padding: 10px; text-align: center;">'.$log->failed.'</td>
+                            <td style="padding: 10px; text-align: center;">'.$log->opened.'</td>
+                        </tr>
+                        ';
+                    }
+                    $row ++;
+                }
+                $logs_html .= '<!-- end loop-->';
+            }
+
+            if(empty($log)) {
+                  $logs_html = '';
+                  $logs_html .= '<tr><td colspan="5">No emails were sent last '.$duration.'</td></tr>';
+            }
+            
+            if($is_addonactivated && ! empty($logs)) {
+                $body .= '<tr>
+                <td style=" text-align: center;">
+                    <h4 style="text-align:center;color:#214A72;font-size:16px;display: inline-block;">
+                        <img src="'.POST_SMTP_ASSETS.'images/reporting/dashicons-clock.png" alt="dashicons-clock" style="vertical-align:middle;width: 20px;margin: -4px 0 0 0;"> Last '.$duration.' Top Emails
+                    </h4>
+                    <table style="width: 100%; border-spacing: 0;">
+                        <tr>
+                            <td style="width: 50%; color: #151D48; font-size: 14px; font-weight: 600; padding: 10px 0 15px;">
+                                Subject
+                            </td>
+                            <td style="color: #83F5AF; width: 12%;text-align: center; padding: 10px 0 15px;">
+                                Total
+                            </td>
+                            <td style="color: #98B9F9; width: 12%;text-align: center; padding: 10px 0 15px;">
+                                Sent
+                            </td>
+                            <td style="color: #FF955F; width: 12%;text-align: center; padding: 10px 0 15px;">
+                                Failed
+                            </td>
+                             <td style="color: #FFAE3A; width: 12%;text-align: center; padding: 10px 0 15px;">
+                                Opened
+                            </td>
+                        </tr>
+                        '.$logs_html.'
+                    </table>
+                </td>
+            </tr>';
+            }
+            
+       $body .='
+        <!---->
+        <tr>
+            <td style="text-align: center;padding: 20px 0;">This email was auto-generated and learn how to <a href="'.$disable_url.'"><strong>disable it</strong></a>
+            </td>
+        </tr>
+       </table>
+    </div>
     </body>
 </html>';
 

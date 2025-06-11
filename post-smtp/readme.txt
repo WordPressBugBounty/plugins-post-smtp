@@ -4,7 +4,7 @@ Contributors: wpexpertsio
 Tags: smtp, gmail smtp, email,  email logs, office 365
 Requires at least: 5.6.0
 Tested up to: 6.8
-Stable tag: 3.2.0
+Stable tag: 3.3.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -287,9 +287,17 @@ Important: If you are using version 2.8.7 or lower of our plugin, please update 
 
 == Changelog ==
 
+= 3.3.0 - June 11, 2025 =
+* NEW - WP Dashboard Widget
+* NEW - Diagnostic Report Send Form
+* NEW - Mailersend Mailer Integration
+* FIX - Added Validation In Domain Checker  DNS, SPF, DMARC
+* FIX - LOCO Translate Issue 
+* FIX - Email Summary Improvement 
+
 = 3.2.0 - May 19, 2025 =
-* NEW - Introducing Email Tester to test your email deliverability.
-* FIX - Removed id duplication in the Wizard.
+* New - Introducing Email Tester to test your email deliverability.
+* Fix - Removed id duplication in the Wizard.
 
 = 3.1.4 - Apr 08, 2025 =
 * FIX - To column in email logs was empty in some cases.

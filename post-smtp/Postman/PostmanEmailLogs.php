@@ -69,7 +69,7 @@ class PostmanEmailLogs {
             $header = $log['original_headers'];
             $msg = $log['original_message'];
  			$msg = $this->purify_html( $msg );
-           	echo ( isset ( $header ) && strpos( $header, "text/html" ) ) ? $msg : '<pre>' . $msg . '</pre>' ;
+           	echo ( isset ( $header ) && strpos( $header, "text/html" ) ) ? $msg : '' . $msg . '' ;
 
             die;
 
@@ -98,7 +98,8 @@ class PostmanEmailLogs {
 
 		// ✅ Allow all attributes except JavaScript-based ones
 		$config->set('HTML.AllowedAttributes', null);
-
+        $config->set('CSS.AllowedProperties', 'border-radius, background');
+    
 		// ❌ Block JavaScript-based attacks
 		$config->set( 'HTML.ForbiddenElements', ['script'] );
 		
@@ -110,12 +111,12 @@ class PostmanEmailLogs {
 			'mailto' => true,
 			'tel'   => true,
 		]); 
-		
+        
 		$config->set( 'URI.SafeIframeRegexp', '' );
 		// ✅ Allow inline styles but prevent unsafe styles
 		$config->set( 'CSS.Trusted', false ); // Block dangerous inline styles.
 		$config->set( 'CSS.AllowedProperties', null ); // NULL means allow all CSS properties.
-
+        $config->set( 'CSS.MaxImgLength', null );
         // this library is removing display:flex how can we fix it?
         $config->set( 'CSS.AllowTricky', true );
 
@@ -312,9 +313,7 @@ class PostmanEmailLogs {
 
         }
         else {
-            if( isset( $data[ 'success' ] ) ) {   
                 return $this->db->insert( $this->db->prefix . $this->db_name, $data  ) ? $this->db->insert_id : false;
-            }
         }
 
     }
