@@ -74,8 +74,7 @@ class PostmanEmailLogs {
             $header = $log['original_headers'];
             $msg = $log['original_message'];
  			$msg = $this->purify_html( $msg );
-           	echo ( isset ( $header ) && strpos( $header, "text/html" ) ) ? $msg : '' . $msg . '' ;
-
+        	echo ( isset ( $header ) && strpos( $header, "text/html" ) ) ? $msg : '<pre>' . $msg . '</pre>' ;
             die;
 
         }
@@ -455,8 +454,11 @@ class PostmanEmailLogs {
                  */
                 $row = apply_filters( 'ps_email_logs_row', $row );
 
-                //Escape HTML
+                //Escape HTML for safe output.
                 $row->original_subject = esc_html( $row->original_subject );
+                if ( isset( $row->event_type ) ) {
+                    $row->event_type = esc_html( $row->event_type );
+                }
 
             }
 
@@ -678,12 +680,27 @@ class PostmanEmailLogs {
 
 		if( isset( $_POST['action'] ) && $_POST['action'] == 'ps-view-log' ) {
 
-			$id = sanitize_text_field( $_POST['id'] );
+			$id   = sanitize_text_field( $_POST['id'] );
 			$type = array( sanitize_text_field( $_POST['type'] ) );
 			$type = $type[0] == 'original_message' ? '' : $type;
 
 			$email_query_log = new PostmanEmailQueryLog();
-			$log = $email_query_log->get_log( $id, $type );
+			$log             = $email_query_log->get_log( $id, $type );
+
+			// When viewing the rendered message (original_message), we still want
+			// reply_to_header available for the desktop popup details table.
+			if ( empty( $type ) && ! isset( $log['reply_to_header'] ) ) {
+				$extra = $email_query_log->get_log(
+					$id,
+					array(
+						'reply_to_header',
+					)
+				);
+
+				if ( is_array( $extra ) && isset( $extra['reply_to_header'] ) ) {
+					$log['reply_to_header'] = $extra['reply_to_header'];
+				}
+			}
             $_log = $log;
 
             //Escape HTML

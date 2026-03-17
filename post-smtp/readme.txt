@@ -4,7 +4,7 @@ Contributors: wpexpertsio
 Tags: smtp, gmail smtp, email,  email logs, office 365
 Requires at least: 5.6.0
 Tested up to: 6.9
-Stable tag: 3.8.0
+Stable tag: 3.9.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -26,9 +26,9 @@ Over **400,000** website owners use **Post SMTP** daily to send WordPress emails
 
 Post SMTP is a free, next-generation WordPress SMTP plugin that improves email deliverability for your WordPress site.
 
-The best part is that the Post SMTP plugin helps you configure any SMTP mailer, including Gmail one-click setup and Microsoft Office 365 (formerly Office 365), to prevent spam marking and ensure high email deliverability.
+The best part is that to ensure high email deliverability the Post SMTP plugin offers 15+ SMTP mailer options, including Gmail, Brevo, Microsoft 365 SMTP (formerly Office 365), Amazon SES, Zoho Mail, Postmark, Mailgun, SendGrid, etc.
 
-With the ✨[Post SMTP Pro version](https://postmansmtp.com/pricing/?utm_source=wp_org&utm_medium=read_me)✨, you can unlock even more advanced features, such as detailed email logs, email delivery stats and reporting, Microsoft 365 (formerly Office 365), Amazon SES, Zoho Mail SMTP integration, multiple options for email alerts (i.e., Teams, Webhook, Twilio, and Slack), and much more.
+With the ✨[Post SMTP Pro version](https://postmansmtp.com/pricing/?utm_source=wp_org&utm_medium=read_me)✨, you can unlock even more advanced features, such as detailed email logs, email delivery stats and reporting, email open-tracking, premium SMTP integration (Microsoft 365, Amazon SES, and Zoho Mail SMTP), multiple options for email alerts (i.e., Teams, Webhook, Twilio, and Slack), and much more.
 
 
 == What is SMTP, and Why Do You Need It? ==
@@ -41,7 +41,7 @@ On top of that, most email clients, such as Outlook (Office 365 / Microsoft365),
 That's why you need to install the Post SMTP plugin on your WordPress site to configure the SMTP mailer of your choice with one-click SMTP setup for Gmail, Microsoft 365, and more.
 
 == How Does Post SMTP Work? ==
-Post SMTP allows you to easily replace the default PHP mail function (wp_mail) of your WordPress site with the SMTP mailer of your choice, like [Microsoft 365 (Office 365)](https://postmansmtp.com/extensions/office-365-extension-for-post-smtp/?utm_source=wp_org&utm_medium=read_me), Brevo, Zoho, [SendGrid](https://postmansmtp.com/configure-wordpress-with-sendgrid/), [Mailgun SMTP](https://postmansmtp.com/setup-mailgun-for-wordpress/), Gmail [(Gmail SMTP Server)](https://postmansmtp.com/how-to-configure-post-smtp-with-gmailgsuite-using-oauth/), Post Mark, Amazon SES etc., which in turn improves WordPress email deliverability.
+Post SMTP allows you to easily replace the default PHP mail function (wp_mail) of your WordPress site with the SMTP mailer of your choice, like [Microsoft 365](https://postmansmtp.com/extensions/office-365-extension-for-post-smtp/?utm_source=wp_org&utm_medium=read_me)(Office 365), Brevo, Zoho, [SendGrid](https://postmansmtp.com/configure-wordpress-with-sendgrid/), [Mailgun SMTP](https://postmansmtp.com/setup-mailgun-for-wordpress/), Gmail [(Gmail SMTP Server)](https://postmansmtp.com/how-to-configure-post-smtp-with-gmailgsuite-using-oauth/), Post Mark, Amazon SES etc., which in turn improves WordPress email deliverability.
 
 **This WordPress mail SMTP plugin provides detailed email logs, email open tracking, email alerts, and a mobile app to monitor WordPress email deliverability.**
 
@@ -153,7 +153,7 @@ Connect your Zoho mail personal or business account with WordPress via Post SMTP
 == ⚡ Added Benefits of Getting Post SMTP Pro ==
 The Post SMTP Pro gives you an edge that makes your WordPress email management and performance reporting a breeze! With Post SMTP Pro, you get the following additional perks:
 
-✅ **Microsoft 365 One-Click Setup:** Upgrade to unlock a smooth and effortless Microsoft email setup. Just enable Microsoft 365 One-Click Setup. With a single toggle, Post SMTP automatically configures everything needed for secure and reliable Outlook / Office 365 email delivery no manual settings required, no technical steps to worry about.
+✅ **Microsoft 365 One-Click:** Upgrade to unlock a smooth and effortless Microsoft email setup. Just enable Microsoft 365 One-Click Setup. With a single toggle, Post SMTP automatically configures everything needed for secure and reliable Outlook / Office 365 email delivery no manual settings required, no technical steps to worry about.
 
 ✅ **Google (Gmail) SMTP One-Click:** Upgrade now for a worry-free Gmail SMTP integration. Activate Gmail One-Click Setup and let Post SMTP Setup Wizard handle all the API-related technicalities.
 
@@ -244,10 +244,7 @@ In short, our Expert Assistance is your one-stop destination for all your WordPr
 
 * **[All In One Login](https://wordpress.org/plugins/all-in-one-login/)** – Secure your WordPress login page, change the wp-login.php URL, and add social logins like Google, Facebook, Microsoft, LINE, and more.
 
-* **[WPExperts WooCommerce Store](https://store.wpexperts.io/woocommerce/)** – Explore premium WooCommerce plugins and professional solutions by WPExperts.
-
-
-== Requirements == 
+* **[WPExperts WooCommerce Store](https://store.wpexperts.io/woocommerce/)** – Explore premium WooCommerce plugins and professional solutions by WPExperts.== Requirements == 
 * WordPress v6.2 and above is recommended
 * PHP v7.6 and above is recommended.
 * Memory should be at least 800KiB per processing at idle.
@@ -326,6 +323,17 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 Important: If you are using version 2.8.7 or lower of our plugin, please update to the latest version as soon as possible. This update contains an urgent security fix that prevents potential vulnerabilities and attacks. We apologize for any inconvenience this may cause you and we appreciate your cooperation. Thank you for using our plugin.
 
 == Changelog ==
+
+= 3.9.0 – Mar 17, 2026 =
+
+* TWEAK – Updated the Setup Wizard UI for Mailers and improved related content.
+* FIX – Resolved REST error: rest_cookie_invalid_nonce (Cookie check failed – 403).
+* FIX – Added support for the pre_wp_mail function for custom implementations via functions.php.
+* FIX – Corrected an issue where submitted notification URLs were passed through esc_url, which escaped HTML entities (such as &) intended only for display.
+* FIX – Resolved an issue where the Post SMTP email logger did not display all recipients.
+* FIX – Fixed missing line breaks in the mail log content.
+* FIX – Resolved the Initial Setup Wizard issue that allowed incorrect email acceptance on the wizard screen.
+* FIX – Addressed missing authorization for Authenticated (Subscriber+) Office 365 OAuth configuration overwrite.
 
 = 3.8.0 – Jan 20, 2026 =
 * NEW – Added [Sweego](https://www.sweego.io/) as an email service provider.

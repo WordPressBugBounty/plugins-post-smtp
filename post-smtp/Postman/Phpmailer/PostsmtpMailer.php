@@ -184,5 +184,7 @@ if ( ! class_exists( 'PostsmtpMailer', false ) && class_exists( 'PHPMailer', fal
 			);
 			return $result;
 		}
+
 	}
+
 }
