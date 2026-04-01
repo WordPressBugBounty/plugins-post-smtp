@@ -4,7 +4,7 @@ Contributors: wpexpertsio
 Tags: smtp, gmail smtp, email,  email logs, office 365
 Requires at least: 5.6.0
 Tested up to: 6.9
-Stable tag: 3.9.0
+Stable tag: 3.9.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -323,9 +323,16 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 Important: If you are using version 2.8.7 or lower of our plugin, please update to the latest version as soon as possible. This update contains an urgent security fix that prevents potential vulnerabilities and attacks. We apologize for any inconvenience this may cause you and we appreciate your cooperation. Thank you for using our plugin.
 
 == Changelog ==
+= 3.9.1 – April 01, 2026 =
+
+* TWEAK – Updated Emailit API to v2.
+* FIX – Added Header support in Maileroo.
+* FIX – Resolved qrstr class conflict.
+* FIX – Emailit API status handling (status code 201 was incorrectly marked as failed instead of pending/successful).
+* FIX – Resolved fatal error: Class "HTMLPurifier_Config" not found.
+* FIX – Fixed SMTP2GO false positive response.
 
 = 3.9.0 – Mar 17, 2026 =
-
 * TWEAK – Updated the Setup Wizard UI for Mailers and improved related content.
 * FIX – Resolved REST error: rest_cookie_invalid_nonce (Cookie check failed – 403).
 * FIX – Added support for the pre_wp_mail function for custom implementations via functions.php.
