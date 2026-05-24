@@ -92,9 +92,9 @@ class PostmanElasticEmailMailEngine implements PostmanMailEngine {
 
         //Adding to receipients
         $to = array();
-        foreach ( (array) $message->getToRecipients() as $recipient ) {
+        foreach ( (array)$message->getToRecipients() as $key => $recipient ) {
 
-            $to[] = $recipient->getEmail();
+            $to[] = !empty( $recipient->getName() ) ? $recipient->getName() . ' <' . $recipient->getEmail() . '>' : $recipient->getEmail();
 
         }
 
@@ -102,7 +102,7 @@ class PostmanElasticEmailMailEngine implements PostmanMailEngine {
         $cc = array();
         foreach ( ( array ) $message->getCcRecipients() as $recipient ) {
 
-            $cc[] = $recipient->getEmail();
+            $cc[] = !empty( $recipient->getName() ) ? $recipient->getName() . ' <' . $recipient->getEmail() . '>' : $recipient->getEmail();
 
         }
 
@@ -110,87 +110,72 @@ class PostmanElasticEmailMailEngine implements PostmanMailEngine {
         $bcc = array();
         foreach ( ( array ) $message->getBccRecipients() as $recipient ) {
 
-            $bcc[] = $recipient->getEmail();
+            $bcc[] = !empty( $recipient->getName() ) ? $recipient->getName() . ' <' . $recipient->getEmail() . '>' : $recipient->getEmail();
 
         }
 
-        $recipients = array( 'To' => $to );
-        if ( ! empty( $cc ) ) {
-            $recipients['CC'] = $cc;
-        }
-        if ( ! empty( $bcc ) ) {
-            $recipients['BCC'] = $bcc;
-        }
-        $email_content['Recipients'] = $recipients;
+        $email_content['Recipients'] = array(
+            'To'    =>  $to,
+            'CC'    =>  $cc,
+            'BCC'   =>  $bcc
+        );
 
-        $charset = 'UTF-8';
-        $body_parts = array();
-        $plain_message = '';
+        //Adding PlainText Body
+        if( !empty( $message->getBodyTextPart() ) ){
 
-        $textPart = $message->getBodyTextPart();
-        if ( ! empty( $textPart ) ) {
+            $body = $message->getBodyTextPart();
             $this->logger->debug( 'Adding body as text' );
-            $plain_message = $textPart;
-            $body_parts[] = array(
-                'ContentType' => 'PlainText',
-                'Content'     => $textPart,
-                'Charset'     => $charset,
-            );
+            $email_content['Content'] = array(
+            'Body'  => array(
+                0        => array(
+                'ContentType'   =>  'PlainText',
+                'Content'       =>  $body
+                )
+            )
+        );
         }
 
-        $htmlPart = $message->getBodyHtmlPart();
-        if ( ! empty( $htmlPart ) ) {
+        //Adding HTML Body
+        if( !empty( $message->getBodyHtmlPart() ) ){
+
+            $body = $message->getBodyHtmlPart();
             $this->logger->debug( 'Adding body as html' );
-            if ( empty( $plain_message ) ) {
-                $plain_message = wp_strip_all_tags( $htmlPart );
-            }
-            $body_parts[] = array(
-                'ContentType' => 'HTML',
-                'Content'     => $htmlPart,
-                'Charset'     => $charset,
-            );
-        }
-
-        if ( empty( $body_parts ) ) {
-            $fallback_body = $message->getBody();
-            if ( ! empty( $fallback_body ) ) {
-                $this->logger->debug( 'Adding body from raw message content' );
-                $content_type = $message->getContentType();
-                $is_html = ! empty( $content_type ) && substr( $content_type, 0, 9 ) === 'text/html';
-                $plain_message = $is_html ? wp_strip_all_tags( $fallback_body ) : $fallback_body;
-                $body_parts[] = array(
-                    'ContentType' => $is_html ? 'HTML' : 'PlainText',
-                    'Content'     => $fallback_body,
-                    'Charset'     => $charset,
-                );
-            }
+            $email_content['Content'] = array(
+            'Body'  => array(
+                0        => array(
+                'ContentType'   =>  'HTML',
+                'Content'       =>  $body
+                )
+            )
+        );
         }
 
         $sender = $message->getFromAddress();
-        $senderEmail = ! empty( $sender->getEmail() ) ? $sender->getEmail() : $options->getMessageSenderEmail();
-        $senderName = ! empty( $sender->getName() ) ? $sender->getName() : $options->getMessageSenderName();
+        $senderEmail = !empty( $sender->getEmail() ) ? $sender->getEmail() : $options->getMessageSenderEmail();
+        $senderName = !empty( $sender->getName() ) ? $sender->getName() : $options->getMessageSenderName();
 
         $replyTo = $message->getReplyTo();
-        $replyTo_email = ! empty( $replyTo ) ? $replyTo->getEmail() : '';
+        $replyTo_email = !empty( $replyTo ) ? $replyTo->getEmail() : '';
+        
 
-        $email_content['Content'] = array(
-            'From'    => ! empty( $senderName ) ? $senderName . ' <' . $senderEmail . '>' : $senderEmail,
-            'Subject' => $message->getSubject(),
-            'Body'    => $body_parts,
-        );
+        $email_content['Content']['EnvelopeFrom'] = !empty( $senderName ) ? $senderName . ' <' . $senderEmail . '>' : $senderEmail;
+        $email_content['Content']['From'] = !empty( $senderName ) ? $senderName . ' <' . $senderEmail . '>' : $senderEmail;
 
-        if ( ! empty( $replyTo_email ) ) {
-            $email_content['Content']['ReplyTo'] = ! empty( $replyTo->getName() )
-                ? $replyTo->getName() . ' <' . $replyTo->getEmail() . '>'
-                : $replyTo->getEmail();
+        if( !empty( $replyTo_email ) ) {
+
+            $email_content['Content']['ReplyTo'] = !empty( $replyTo->getName() ) ? $replyTo->getName() . ' <' . $replyTo->getEmail() . '>' : $replyTo->getEmail();
+
         }
+
+        $email_content['Content']['Subject'] = $message->getSubject();
 
         $attachments = $this->addAttachmentsToMail( $message );
-        if ( ! empty( $attachments ) ) {
-            $email_content['Content']['Attachments'] = $attachments;
-        }
 
-        $email_content['message'] = $plain_message;
+        if( !empty( $attachments ) ) {
+
+            $email_content['Content']['Attachments'] = $attachments;
+
+        }
 
         try {
 

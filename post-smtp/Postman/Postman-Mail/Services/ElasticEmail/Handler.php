@@ -50,7 +50,6 @@ class PostmanElasticEmail extends PostmanServiceRequest {
     private function get_headers() {
 
         return array(
-            'Content-Type'          =>  'application/json',
             'X-ElasticEmail-ApiKey' =>  $this->api_key
         );
 

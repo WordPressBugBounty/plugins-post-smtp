@@ -145,9 +145,6 @@ class Post_SMTP_Mobile {
                 return $class_name;
             }
         }
-        if ( class_exists( 'QRcode', false ) ) {
-            return null;
-        }
         if ( defined( 'QR_MODE_NUL' ) || class_exists( 'qrstr' ) ) {
             return null;
         }
@@ -191,11 +188,18 @@ class Post_SMTP_Mobile {
      * @version 1.0.0
      */
     private function generate_auth_key() {
-        try {
-            return bin2hex( random_bytes( 16 ) );
-        } catch ( Exception $e ) {
-            return md5( uniqid( (string) mt_rand(), true ) );
+
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $chars .= '!@#$%^*()';
+        $chars .= '-_ []{}<>~`+,.;:/|';
+
+        $pass = array(); //remember to declare $pass as an array
+        $alphaLength = strlen( $chars ) - 1; //put the length -1 in cache
+        for ( $i = 0; $i < 32; $i++ ) {
+            $n = rand( 0, $alphaLength );
+            $pass[] = $chars[$n];
         }
+        return implode( $pass ); //turn the array into a string
 
     }
 
@@ -263,22 +267,15 @@ class Post_SMTP_Mobile {
 						
 						foreach( $this->app_connected as $device ) {
 							
-							$url = add_query_arg(
-								array(
-									'action' => 'post_smtp_disconnect_app',
-									'auth_token' => sanitize_text_field( (string) $device['fcm_token'] ),
-									'ps_disconnect_app_nonce' => $nonce,
-								),
-								admin_url( 'admin.php' )
-							);
+							$url = admin_url( "admin.php?action=post_smtp_disconnect_app&auth_token={$device['fcm_token']}&ps_disconnect_app_nonce={$nonce}" );
 							$checked = $device['enable_notification'] == 1 ? 'checked="checked"' : '';
 							
-							echo esc_html( $device['device'] ) . "<a href='" . esc_url( $url ) . "' style='color: red'>Disconnect</a>";
+							echo  esc_html( $device['device'] ) . "<a href='{$url}' style='color: red'>Disconnect</a>";
 							echo '<br />';
 							echo sprintf(
 								'<label for="enable-app-notice">%s <input type="checkbox" id="enable-app-notice" name="postman_app_connection[%s]" %s /></label>',
 								__( 'Send failed email notification' ),
-								esc_attr( $device['fcm_token'] ),
+								$device['fcm_token'],
 								$checked
 							);
 							
@@ -364,7 +361,7 @@ class Post_SMTP_Mobile {
 		if( isset( $_GET['action'] ) && $_GET['action'] == 'post_smtp_disconnect_app' ) {
 			
 			$connected_devices = get_option( 'post_smtp_mobile_app_connection' );
-			$auth_token = isset( $_GET['auth_token'] ) ? sanitize_text_field( wp_unslash( $_GET['auth_token'] ) ) : '';
+			$auth_token = $_GET['auth_token'];
 			$server_url = get_option( 'post_smtp_server_url' );
 			
 			if( $connected_devices && isset( $connected_devices[$auth_token] ) ) {
@@ -408,13 +405,6 @@ class Post_SMTP_Mobile {
      * @version 1.0.0
      */
     public function dismiss_app_notice() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'Sorry, you are not allowed to perform this action.', 'post-smtp' ) );
-        }
-
-        if( ! isset( $_GET['_psnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_psnonce'] ) ), 'ps-dismiss-app-notice' ) ) {
-            wp_die( 'Security check' );
-        }
 
         if( isset( $_GET['action'] ) && $_GET['action'] === 'ps_dimiss_app_notice' ) {
 

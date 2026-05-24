@@ -247,16 +247,14 @@ class Postman {
 
 		// register the setup_admin function on plugins_loaded because we need to call
 		// current_user_can to verify the capability of the current user
-		if ( PostmanUtils::isAdmin() && is_admin() && !( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
+		if ( PostmanUtils::isAdmin() && is_admin() ) {
 			$this->setup_admin();
 		}
 
 		if ( get_option( 'post_smtp_activation_redirect' ) ) {
 			delete_option( 'post_smtp_activation_redirect' );
-			if ( current_user_can( Postman::MANAGE_POSTMAN_CAPABILITY_NAME ) ) {
-				wp_safe_redirect( admin_url( 'admin.php?page=postman/configuration_wizard' ) );
-				exit;
-			}
+			wp_safe_redirect( admin_url( 'admin.php?page=postman/configuration_wizard' ) );
+			exit;
 		}
 		
 	}

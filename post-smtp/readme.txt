@@ -4,7 +4,7 @@ Contributors: wpexpertsio
 Tags: smtp, gmail smtp, email,  email logs, office 365
 Requires at least: 5.6.0
 Tested up to: 7.0
-Stable tag: 3.9.2
+Stable tag: 3.9.3
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -324,13 +324,15 @@ Important: If you are using version 2.8.7 or lower of our plugin, please update 
 
 == Changelog ==
 
+= 3.9.3 - May 24, 2026 =
+* Rolled back to version 3.9.1 due to socket related errors.
+
 = 3.9.2 – May 22, 2026 =
 * TWEAK - Added WordPress 7.0 Compatibility.
 * FIX – Addressed PHP deprecation notice related to using null as an array offset
 * FIX – Fixed compatibility issue with the Google Site Kit plugin
 
 = 3.9.1 – April 01, 2026 =
-
 * TWEAK – Updated Emailit API to v2.
 * FIX – Added Header support in Maileroo.
 * FIX – Resolved qrstr class conflict.
