@@ -71,23 +71,14 @@ class PostmanInstaller {
 		$options = get_option( PostmanOptions::POSTMAN_OPTIONS );
 		$args = array(
 			'fallback_smtp_enabled' => 'no',
-			'primary_connection' => 0,
 		);
 
 		if ( empty( $options ) ) {
 			add_option( 'postman_options', $args );
 
 		} else {
-			$missing = [];
-
-			if ( ! isset( $options['fallback_smtp_enabled'] ) ) {
-				$missing['fallback_smtp_enabled'] = 'no';
-			}
-			if ( ! isset( $options['primary_connection'] ) ) {
-				$missing['primary_connection'] = 0;
-			}
-			if ( ! empty( $missing ) ) {
-				$result = array_merge( $options, $missing );
+			if ( empty( $options['fallback_smtp_enabled'] ) ) {
+				$result = array_merge($options, $args);
 				update_option( PostmanOptions::POSTMAN_OPTIONS, $result );
 			}
 		}
@@ -102,12 +93,10 @@ class PostmanInstaller {
 
             $options['post_smtp_allow_overwrite'] = '1';
             update_site_option( PostmanOptions::POSTMAN_NETWORK_OPTIONS, $options );
-			
-			// handle network activation
-			// from https://wordpress.org/support/topic/new-function-wp_get_sites?replies=11
-			// run the activation function for each blog id
+		}
+
+		if ( is_multisite() && is_plugin_active_for_network( plugin_basename( POST_SMTP_BASE ) ) ) {
 			$old_blog = get_current_blog_id();
-			// Get all blog ids
 			$subsites = get_sites();
 			foreach ( $subsites as $subsite ) {
 				$this->logger->trace( 'multisite: switching to blog ' . $subsite->blog_id );
@@ -117,7 +106,6 @@ class PostmanInstaller {
 			}
 			switch_to_blog( $old_blog );
 		} else {
-			// handle single-site activation
 			$this->handleOptionUpdates();
 			$this->addCapability();
 		}
@@ -129,12 +117,8 @@ class PostmanInstaller {
 	 * Handle deactivation of the plugin
 	 */
 	public function deactivatePostman() {
-		if ( function_exists( 'is_multisite' ) && is_multisite() ) {
-			// handle network deactivation
-			// from https://wordpress.org/support/topic/new-function-wp_get_sites?replies=11
-			// run the deactivation function for each blog id
+		if ( is_multisite() && is_plugin_active_for_network( plugin_basename( POST_SMTP_BASE ) ) ) {
 			$old_blog = get_current_blog_id();
-			// Get all blog ids
 			$subsites = get_sites();
 			foreach ( $subsites as $subsite ) {
 				$this->logger->trace( 'multisite: switching to blog ' . $subsite->blog_id );
@@ -143,7 +127,6 @@ class PostmanInstaller {
 			}
 			switch_to_blog( $old_blog );
 		} else {
-			// handle single-site deactivation
 			$this->removeCapability();
 		}
 	}
@@ -155,19 +138,13 @@ class PostmanInstaller {
 		if ( $this->logger->isDebug() ) {
 			$this->logger->debug( 'Adding admin capability' );
 		}
-		// Grant to every role that can activate plugins — same bar as activating this plugin.
-		// Only adding to `administrator` breaks users (and automated tests) that use a custom
-		// role with activate_plugins, causing a 403 on the post-activation wizard redirect.
-		$wp_roles = wp_roles();
-		if ( ! $wp_roles ) {
-			return;
-		}
-		foreach ( array_keys( $wp_roles->roles ) as $role_name ) {
-			$role = get_role( $role_name );
-			if ( $role && $role->has_cap( 'activate_plugins' ) ) {
-				$role->add_cap( Postman::MANAGE_POSTMAN_CAPABILITY_NAME );
-				$role->add_cap( Postman::MANAGE_POSTMAN_CAPABILITY_LOGS );
-			}
+		// ref: https://codex.wordpress.org/Function_Reference/add_cap
+		// NB: This setting is saved to the database, so it might be better to run this on theme/plugin activation
+		// add the custom capability to the administrator role
+		$role = get_role( Postman::ADMINISTRATOR_ROLE_NAME );
+		if ( $role ) {
+			$role->add_cap( Postman::MANAGE_POSTMAN_CAPABILITY_NAME );
+			$role->add_cap( Postman::MANAGE_POSTMAN_CAPABILITY_LOGS );
 		}
 	}
 
@@ -178,17 +155,16 @@ class PostmanInstaller {
 		if ( $this->logger->isDebug() ) {
 			$this->logger->debug( 'Removing admin capability' );
 		}
-		$wp_roles = wp_roles();
-		if ( ! $wp_roles ) {
-			return;
+		// ref: https://codex.wordpress.org/Function_Reference/add_cap
+		// NB: This setting is saved to the database, so it might be better to run this on theme/plugin activation
+		// remove the custom capability from the administrator role
+		$role = get_role( Postman::ADMINISTRATOR_ROLE_NAME );
+		if ( $role ) {
+			$role->remove_cap( Postman::MANAGE_POSTMAN_CAPABILITY_NAME );
+			$role->remove_cap( Postman::MANAGE_POSTMAN_CAPABILITY_LOGS );
 		}
-		foreach ( array_keys( $wp_roles->roles ) as $role_name ) {
-			$role = get_role( $role_name );
-			if ( $role && $role->has_cap( Postman::MANAGE_POSTMAN_CAPABILITY_NAME ) ) {
-				$role->remove_cap( Postman::MANAGE_POSTMAN_CAPABILITY_NAME );
-				$role->remove_cap( Postman::MANAGE_POSTMAN_CAPABILITY_LOGS );
-			}
-		}
+
+		delete_option( 'postman_log_access_roles' );
 	}
 
 	/**
@@ -307,24 +283,20 @@ class PostmanInstaller {
 		// &= does not work as expected in my PHP
 		$lockSuccess = $lockSuccess && PostmanUtils::deleteLockFile();
 
-		if( $postmanState ) {
-
-			$postmanState ['locking_enabled'] = $lockSuccess;
-
-		}
+		   if( is_array($postmanState) ) {
+			   $postmanState ['locking_enabled'] = $lockSuccess;
+		   }
 
 		// always update the version number
-		if ( ! isset( $postmanState ['install_date'] ) ) {
-			$this->logger->debug( 'Upgrading database: adding install_date' );
-			$postmanState ['install_date'] = time();
-		}
+		   if ( is_array($postmanState) && ! isset( $postmanState ['install_date'] ) ) {
+			   $this->logger->debug( 'Upgrading database: adding install_date' );
+			   $postmanState ['install_date'] = time();
+		   }
 		$pluginData = apply_filters( 'postman_get_plugin_metadata', null );
 
-		if( $postmanState ) {
-
-			$postmanState ['version'] = $pluginData ['version'];
-
-		}
+		   if( is_array($postmanState) ) {
+			   $postmanState ['version'] = $pluginData ['version'];
+		   }
 
 		update_option( 'postman_state', $postmanState );
 				delete_option( 'postman_session' );

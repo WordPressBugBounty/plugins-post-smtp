@@ -1,6 +1,6 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+    exit; // Exit if accessed directly
 }
 
 require_once 'PostmanModuleTransport.php';
@@ -13,6 +13,7 @@ require_once 'PostmanZendMailTransportConfigurationFactory.php';
 class PostmanTransportRegistry {
 	private $transports;
 	private $logger;
+	private $registration_attempted = false;
 
 	/**
 	 */
@@ -34,6 +35,100 @@ class PostmanTransportRegistry {
 	}
 	public function getTransports() {
 		return $this->transports;
+	}
+
+	/**
+	 * Centralized method to register all transports.
+	 * Called from Postman::on_init() and ensureTransportsRegistered() (before init).
+	 * Idempotent — safe to call multiple times.
+	 *
+	 * @param string $rootPluginFilenameAndPath The root plugin file path
+	 * @return bool True if transports were registered, false if already registered
+	 */
+	public function registerAllTransports( $rootPluginFilenameAndPath ) {
+		if ( $this->transports !== null && ! empty( $this->transports ) ) {
+			return false;
+		}
+
+		if ( $this->registration_attempted ) {
+			return $this->transports !== null && ! empty( $this->transports );
+		}
+
+		$this->registration_attempted = true;
+
+		if ( ! class_exists( 'PostmanDefaultModuleTransport' ) ) {
+			$pluginPath = defined( 'POST_SMTP_PATH' ) ? POST_SMTP_PATH : dirname( dirname( __FILE__ ) );
+
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanDefaultModuleTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanSmtpModuleTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanGmailApiModuleTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanMandrillTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanSendGridTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanMailerSendTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanMailgunTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanSendinblueTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanMailtrapTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanResendTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanCloudflareTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanSmtpcomTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanMailjetTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanSendpulseTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanPostmarkTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanSparkPostTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanElasticEmailTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanSmtp2GoTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanEmailitTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanMailerooTransport.php';
+			require_once $pluginPath . '/Postman/Postman-Mail/PostmanSweegoTransport.php';
+		}
+
+		$this->registerTransport( new PostmanDefaultModuleTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanSmtpModuleTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanGmailApiModuleTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanMandrillTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanSendGridTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanMailerSendTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanMailgunTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanSendinblueTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanMailtrapTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanResendTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanCloudflareTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanSmtpcomTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanMailjetTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanSendpulseTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanPostmarkTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanSparkPostTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanElasticEmailTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanSmtp2GoTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanEmailitTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanMailerooTransport( $rootPluginFilenameAndPath ) );
+		$this->registerTransport( new PostmanSweegoTransport( $rootPluginFilenameAndPath ) );
+
+		do_action( 'postsmtp_register_transport', $this );
+
+		if ( $this->logger->isDebug() ) {
+			$this->logger->debug( 'All transports registered successfully' );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Register transports on demand when wp_mail() runs before the init hook
+	 * (e.g. Wordfence / AIOS unlock emails on blocked admin login).
+	 */
+	private function ensureTransportsRegistered() {
+		if ( $this->transports !== null ) {
+			return;
+		}
+
+		if ( class_exists( 'Postman' ) && property_exists( 'Postman', 'rootPlugin' ) && ! empty( Postman::$rootPlugin ) ) {
+			$registered = $this->registerAllTransports( Postman::$rootPlugin );
+
+			if ( $registered && $this->logger->isDebug() ) {
+				$this->logger->debug( 'Transports registered on-demand before init hook' );
+			}
+		}
 	}
 
 	/**
@@ -74,131 +169,73 @@ class PostmanTransportRegistry {
 
 	/**
 	 * Retrieve the transport Postman is currently configured with.
-	 *
-	 * @return PostmanModuleTransport
+	 *	
+	 * @return PostmanModuleTransport|null
 	 * @deprecated 2.1.4 use getActiveTransport()
 	 * @see getActiveTransport()
 	 */
 	public function getCurrentTransport() {
 		$selectedTransport = PostmanOptions::getInstance()->getTransportType() ?? '';
 		$transports = $this->getTransports();
-		if ( ! isset( $transports [ $selectedTransport ] ) ) {
-			return $transports ['default'];
-		} else {
+		if ( $transports !== null && isset( $transports [ $selectedTransport ] ) ) {
 			return $transports [ $selectedTransport ];
+		} elseif ( $transports !== null && isset( $transports ['default'] ) ) {
+			return $transports ['default'];
 		}
+		return null;
 	}
 
 	/**
 	 *
 	 * @param PostmanOptions    $options
 	 * @param PostmanOAuthToken $token
-	 * @return boolean
+	 * @return PostmanModuleTransport|null
 	 */
 	public function getActiveTransport() {
+		// Ensure transports are registered if they haven't been yet (before init).
+		$this->ensureTransportsRegistered();
+
 	    // During fallback mode, always use SMTP transport
 	    $options = PostmanOptions::getInstance();
 	    if ( $options->is_fallback ) {
 	        $transports = $this->getTransports();
-	        if ( isset( $transports['smtp'] ) ) {
+	        if ( $transports !== null && isset( $transports['smtp'] ) ) {
 	            return $transports['smtp'];
-	        } else {
+	        } elseif ( $transports !== null && isset( $transports['default'] ) ) {
 	            return $transports['default'];
 	        }
+	        return null;
 	    }
 	    
 		$selectedTransport = PostmanOptions::getInstance()->getTransportType() ?? '';
 		
 		$transports = $this->getTransports();
-		if ( isset( $transports [ $selectedTransport ] ) ) {
+		if ( $transports !== null && isset( $transports [ $selectedTransport ] ) ) {
 			$transport = $transports [ $selectedTransport ];
 			if ( $transport->getSlug() == $selectedTransport && $transport->isConfiguredAndReady() ) {
 				return $transport;
 			}
 		}
-		return $transports ['default'];
-	}
-
-	/**
-	 * Get provider name by connection ID from WordPress options.
-	 *
-	 * @param int $connection_id The connection ID.
-	 * @return string|null The provider name or null if not found.
-	 */
-	public function get_provider_name_by_id( $connection_id ) {
-		// Retrieve postman_connections from WordPress options.
-		$connections = get_option( 'postman_connections', array() );
-
-		// Check if the connection ID exists and return the provider name.
-		return isset( $connections[$connection_id] ) ? $connections[$connection_id]['provider'] : null;
-	}
-	/**
-	 *
-	 * @param PostmanOptions    $options
-	 * @param PostmanOAuthToken $token
-	 * @return boolean
-	 */
-	public function getPrimaryConnection() {
-		$selectedTransport = PostmanOptions::getInstance()->getSelectedPrimaryName();
-		$transports        = $this->getTransports();
-		if ( isset( $transports [ $selectedTransport ] ) ) {
-			$transport = $transports [ $selectedTransport ];
-			if ( $transport->getSlug() == $selectedTransport ) {
-				return $transport;
-			}
+		if ( $transports !== null && isset( $transports ['default'] ) ) {
+			return $transports ['default'];
 		}
-		return $transports ['default'];
-	}
-
-
-	/**
-	 *
-	 * @param PostmanOptions    $options
-	 * @param PostmanOAuthToken $token
-	 * @return boolean
-	 */
-	public function getConnectionByName( $name ) {
-		$transports        = $this->getTransports();
-		if ( isset( $transports [ $name ] ) ) {
-			$transport = $transports [ $name ];
-			if ( $transport->getSlug() == $name ) {
-				return $transport;
-			}
-		}
-		return $transports ['default'];
-	}
-
-	/**
-	 *
-	 * @param PostmanOptions    $options
-	 * @param PostmanOAuthToken $token
-	 * @return boolean
-	 */
-	public function getFallbackConnection() {
-		$selectedTransport = PostmanOptions::getInstance()->getSelectedFallbackName();
-		$transports        = $this->getTransports();
-		if ( isset( $transports [ $selectedTransport ] ) ) {
-			$transport = $transports [ $selectedTransport ];
-			if ( $transport->getSlug() == $selectedTransport ) {
-				return $transport;
-			}
-		}
-		return $transports ['default'];
+		return null;
 	}
 
 	/**
 	 * Retrieve the transport Postman is currently configured with.
 	 *
-	 * @return PostmanModuleTransport
+	 * @return PostmanModuleTransport|null
 	 */
 	public function getSelectedTransport() {
 		$selectedTransport = PostmanOptions::getInstance()->getTransportType() ?? '';
 		$transports = $this->getTransports();
-		if ( isset( $transports [ $selectedTransport ] ) ) {
+		if ( $transports !== null && isset( $transports [ $selectedTransport ] ) ) {
 			return $transports [ $selectedTransport ];
-		} else {
+		} elseif ( $transports !== null && isset( $transports ['default'] ) ) {
 			return $transports ['default'];
 		}
+		return null;
 	}
 
 	/**
@@ -266,8 +303,8 @@ class PostmanTransportRegistry {
 	 */
 	public function getRecommendation( PostmanWizardSocket $hostData, $userAuthOverride, $originalSmtpServer ) {
 		$scrubbedUserAuthOverride = $this->scrubUserOverride( $hostData, $userAuthOverride );
-		$transport                = $this->getTransport( $hostData->transport );
-		$recommendation           = $transport->getConfigurationBid( $hostData, $scrubbedUserAuthOverride, $originalSmtpServer );
+		$transport = $this->getTransport( $hostData->transport );
+		$recommendation = $transport->getConfigurationBid( $hostData, $scrubbedUserAuthOverride, $originalSmtpServer );
 		if ( $this->logger->isDebug() ) {
 			$this->logger->debug( sprintf( 'Transport %s bid %s', $transport->getName(), $recommendation ['priority'] ) );
 		}
@@ -277,14 +314,14 @@ class PostmanTransportRegistry {
 	/**
 	 *
 	 * @param PostmanWizardSocket $hostData
-	 * @param mixed               $userAuthOverride
+	 * @param mixed             $userAuthOverride
 	 * @return NULL
 	 */
 	private function scrubUserOverride( PostmanWizardSocket $hostData, $userAuthOverride ) {
 		$this->logger->trace( 'before scrubbing userAuthOverride: ' . $userAuthOverride );
 
 		// validate userAuthOverride
-		if ( ! ( $userAuthOverride == 'oauth2' || $userAuthOverride == 'password' || $userAuthOverride == 'none' ) ) {
+		if ( ! ($userAuthOverride == 'oauth2' || $userAuthOverride == 'password' || $userAuthOverride == 'none') ) {
 			$userAuthOverride = null;
 		}
 
@@ -311,54 +348,36 @@ class PostmanTransportRegistry {
 	/**
 	 */
 	public function getReadyMessage() {
-
+		
 		$message = array();
-
-		if ( Postman_Connection_Resolver::is_legacy_mode() ) {
-			$is_configured = $this->getActiveTransport()->isConfiguredAndReady();
-		} else {
-			$options     = PostmanOptions::getInstance();
-			$connections = get_option( 'postman_connections', array() );
-			if ( ! is_array( $connections ) ) {
-				$connections = array();
-			}
-			$primary = $options->getSelectedPrimary();
-			if ( null === $primary || '' === (string) $primary ) {
-				$primary = empty( $connections ) ? null : array_key_first( $connections );
-			}
-			$is_configured = (
-				null !== $primary
-				&& '' !== (string) $primary
-				&& isset( $connections[ $primary ] )
-				&& is_array( $connections[ $primary ] )
-			);
-		}
-
-		if ( $is_configured ) {
+		$transport = $this->getCurrentTransport();
+		
+		if ( $transport && $transport->isConfiguredAndReady() ) {
 			if ( PostmanOptions::getInstance()->getRunMode() != PostmanOptions::RUN_MODE_PRODUCTION ) {
 				$message = array(
-					'error'   => true,
+					'error' => true,
 					'message' => __( 'Postman is in <em>non-Production</em> mode and is dumping all emails.', 'post-smtp' ),
 				);
 			} else {
 				$message = array(
-					'error'   => false,
+					'error' => false,
 					'message' => __( 'Postman is configured.', 'post-smtp' ),
 				);
 			}
 		} else {
 			$message = array(
-				'error'   => true,
+				'error' => true,
 				'message' => __( 'Postman is <em>not</em> configured and is mimicking out-of-the-box WordPress email delivery.', 'post-smtp' ),
 			);
 		}
-
+	
 		/**
 		 * Filters Dashobard Notice
-		 *
+		 * 
 		 * @since 2.6.0
 		 * @version 1.0.0
 		 */
 		return apply_filters( 'post_smtp_dashboard_notice', $message );
+	
 	}
 }

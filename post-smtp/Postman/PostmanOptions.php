@@ -94,6 +94,10 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 	const SENDINBLUE_API_KEY = 'sendinblue_api_key';
 	const MAILTRAP_API_KEY = 'mailtrap_api_key';
 	const RESEND_API_KEY = 'resend_api_key';
+	const CLOUDFLARE_API_TOKEN = 'cloudflare_api_token';
+	const CLOUDFLARE_ACCOUNT_ID = 'cloudflare_account_id';
+	const SMTPCOM_API_KEY = 'smtpcom_api_key';
+	const SMTPCOM_CHANNEL = 'smtpcom_channel';
 	const MAILJET_API_KEY = 'mailjet_api_key';
 		const MAILJET_SECRET_KEY = 'mailjet_secret_key';
 		const SENDPULSE_API_KEY = 'sendpulse_api_key';
@@ -124,19 +128,19 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 		const INCOMPATIBLE_PHP_VERSION = 'incompatible_php_version';
 
 		// Fallback
-        const FALLBACK_SMTP_ENABLED = 'fallback_smtp_enabled';
-        const FALLBACK_SMTP_HOSTNAME = 'fallback_smtp_hostname';
-        const FALLBACK_SMTP_PORT	 = 'fallback_smtp_port';
-        const FALLBACK_SMTP_SECURITY = 'fallback_smtp_security';
-		const FALLBACK_FROM_EMAIL    = 'fallback_from_email';
-        const FALLBACK_SMTP_USE_AUTH = 'fallback_smtp_use_auth';
-        const FALLBACK_SMTP_USERNAME = 'fallback_smtp_username';
-        const FALLBACK_SMTP_PASSWORD = 'fallback_smtp_password';
-		const FALLBACK_SELECTED      = 'selected_fallback';
-		const PRIMARY_CONNECTION     = 'primary_connection';
+		const FALLBACK_SMTP_ENABLED = 'fallback_smtp_enabled';
+		const FALLBACK_SMTP_HOSTNAME = 'fallback_smtp_hostname';
+		const FALLBACK_SMTP_PORT = 'fallback_smtp_port';
+		const FALLBACK_SMTP_SECURITY = 'fallback_smtp_security';
+		const FALLBACK_FROM_EMAIL = 'fallback_from_email';
+		const FALLBACK_SMTP_USE_AUTH = 'fallback_smtp_use_auth';
+		const FALLBACK_SMTP_USERNAME = 'fallback_smtp_username';
+		const FALLBACK_SMTP_PASSWORD = 'fallback_smtp_password';
+
 		// Emailit integration
 		const EMAILIT_API_KEY = 'emailit_api_key';
 		const MAILEROO_API_KEY = 'maileroo_api_key';
+
 		const SWEEGO_API_KEY  = 'sweego_api_key';
 
 		// defaults
@@ -164,8 +168,6 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 
 		// options data
 		private $options;
-
-		private $existing_db_version = '';
 
 		// singleton instance
 		public static function getInstance() {
@@ -250,31 +252,23 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 
 			if ( isset( $this->options [ self::RUN_MODE ] ) ) {
 				return $this->options [ self::RUN_MODE ];
-			} else { 
-				return self::DEFAULT_RUN_MODE; 
-			}
+			} else { 				return self::DEFAULT_RUN_MODE; }
 		}
 		public function getMailLoggingMaxEntries() {
 			if ( isset( $this->options [ PostmanOptions::MAIL_LOG_MAX_ENTRIES ] ) ) {
 				return $this->options [ PostmanOptions::MAIL_LOG_MAX_ENTRIES ];
-			} else { 
-				return self::DEFAULT_MAIL_LOG_ENTRIES; 
-			}
+			} else { 				return self::DEFAULT_MAIL_LOG_ENTRIES; }
 		}
 		public function getTranscriptSize() {
 			if ( isset( $this->options [ PostmanOptions::TRANSCRIPT_SIZE ] ) ) {
 				return $this->options [ PostmanOptions::TRANSCRIPT_SIZE ];
-			} else { 				
-				return self::DEFAULT_TRANSCRIPT_SIZE; 
-			}
+			} else { 				return self::DEFAULT_TRANSCRIPT_SIZE; }
 		}
 
 		public function getLogLevel() {
 			if ( isset( $this->options [ PostmanOptions::LOG_LEVEL ] ) ) {
 				return $this->options [ PostmanOptions::LOG_LEVEL ];
-			} else { 				
-				return self::DEFAULT_LOG_LEVEL; 
-			}
+			} else { 				return self::DEFAULT_LOG_LEVEL; }
 		}
 
 
@@ -292,8 +286,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 		}
 		public function getAdditionalHeaders() {
 			if ( isset( $this->options [ self::ADDITIONAL_HEADERS ] ) ) {
-				return $this->options [ self::ADDITIONAL_HEADERS ]; 
-			}
+				return $this->options [ self::ADDITIONAL_HEADERS ]; }
 		}
 		public function getHostname() {
 
@@ -302,8 +295,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options [ PostmanOptions::HOSTNAME ] ) ) {
-				return $this->options [ PostmanOptions::HOSTNAME ]; 
-			}
+				return $this->options [ PostmanOptions::HOSTNAME ]; }
 		}
 
 		public function getPort() {
@@ -313,8 +305,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options [ PostmanOptions::PORT ] ) ) {
-				return $this->options [ PostmanOptions::PORT ]; 
-			}
+				return $this->options [ PostmanOptions::PORT ]; }
 		}
 
 		public function getEnvelopeSender() {
@@ -324,8 +315,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options [ PostmanOptions::ENVELOPE_SENDER ] ) ) {
-				return $this->options [ PostmanOptions::ENVELOPE_SENDER ]; 
-			}
+				return $this->options [ PostmanOptions::ENVELOPE_SENDER ]; }
 		}
 
 		public function getMessageSenderEmail() {
@@ -365,16 +355,13 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			
 			}
 		}
-
 		public function getClientId() {
-			if ( isset( $this->options[ PostmanOptions::CLIENT_ID ] ) ) {
-					return $this->options [ PostmanOptions::CLIENT_ID ]; 
-			}
+			if ( isset( $this->options [ PostmanOptions::CLIENT_ID ] ) ) {
+				return $this->options [ PostmanOptions::CLIENT_ID ]; }
 		}
 		public function getClientSecret() {
 			if ( isset( $this->options [ PostmanOptions::CLIENT_SECRET ] ) ) {
-				return $this->options [ PostmanOptions::CLIENT_SECRET ]; 
-			}
+				return $this->options [ PostmanOptions::CLIENT_SECRET ]; }
 		}
 
 		public function getTransportType() {
@@ -424,71 +411,6 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 		}
 
-		/**
-		 * Decode a secret read from postman_options (unwraps accidental multi-layer base64).
-		 *
-		 * @param mixed $stored Raw option value.
-		 * @return string
-		 */
-		private function decode_option_secret_for_read( $stored ) {
-			if ( null === $stored || '' === $stored ) {
-				return '';
-			}
-			if ( class_exists( 'Postman_Connection_Resolver', false ) ) {
-				return Postman_Connection_Resolver::decode_stored_option_secret( $stored );
-			}
-			$decoded = base64_decode( (string) $stored, true );
-
-			return ( false !== $decoded ) ? $decoded : (string) $stored;
-		}
-
-		/**
-		 * HTTP API keys must be printable ASCII. {@see Postman_Connection_Resolver::decode_stored_option_secret()}
-		 * can unwrap one layer too many when the plaintext token is still valid base64-shaped, yielding binary garbage.
-		 *
-		 * @param mixed $candidate Candidate secret after decode.
-		 * @return bool
-		 */
-		private function decoded_secret_looks_like_http_api_key( $candidate ) {
-			if ( null === $candidate ) {
-				return false;
-			}
-			$s = trim( (string) $candidate );
-			if ( strlen( $s ) < 4 ) {
-				return false;
-			}
-
-			return (bool) preg_match( '/\A[\x20-\x7E]+\z/', $s );
-		}
-
-		/**
-		 * Read a base64-stored API secret from postman_options without over-unwrapping
-		 * (decode_stored_option_secret can strip one layer too many when the plaintext is still base64-shaped).
-		 *
-		 * @param string $option_key {@see PostmanOptions} constant, e.g. MAILTRAP_API_KEY.
-		 * @return string|null
-		 */
-		private function get_http_api_secret_from_option( $option_key ) {
-			if ( ! isset( $this->options[ $option_key ] ) ) {
-				return null;
-			}
-			$raw        = $this->options[ $option_key ];
-			$from_chain = $this->decode_option_secret_for_read( $raw );
-			if ( $this->decoded_secret_looks_like_http_api_key( $from_chain ) ) {
-				return trim( (string) $from_chain );
-			}
-			$once = base64_decode( (string) $raw, true );
-			if ( false !== $once && $this->decoded_secret_looks_like_http_api_key( $once ) ) {
-				return trim( (string) $once );
-			}
-			$plain = trim( (string) $raw );
-			if ( $this->decoded_secret_looks_like_http_api_key( $plain ) ) {
-				return $plain;
-			}
-
-			return trim( (string) $from_chain );
-		}
-
 		public function getPassword() {
 
 			if ( $this->is_fallback ) {
@@ -500,7 +422,13 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options [ PostmanOptions::BASIC_AUTH_PASSWORD ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::BASIC_AUTH_PASSWORD ] );
+				$value = $this->options [ PostmanOptions::BASIC_AUTH_PASSWORD ];
+				$decoded = base64_decode( $value, true );
+				// If decoding fails (e.g. password stored as plain text or from import), return as-is so auth still works.
+				if ( $decoded === false ) {
+					return $value;
+				}
+				return $decoded;
 			}
 		}
 
@@ -530,63 +458,11 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 		}
 
-		public function getSelectedFallback() {
-            if ( isset( $this->options [ PostmanOptions::FALLBACK_SELECTED ] ) ) {
-                return $this->options [ PostmanOptions::FALLBACK_SELECTED ];
-            }
-        }
-
-		public function getSelectedPrimary() {
-			// ✅ 1. Check if we are editing a fallback (transient exists)
-			$fallback_edit = get_transient( 'post_smtp_fallback_edit' );
-			if ( $fallback_edit !== false ) {
-				return $fallback_edit; // return the ID set in transient
+		public function getFallbackAuth() {
+			if ( isset( $this->options [ PostmanOptions::FALLBACK_SMTP_USE_AUTH ] ) ) {
+				return $this->options [ PostmanOptions::FALLBACK_SMTP_USE_AUTH ];
 			}
-			
-			// ✅ 2. Use last connection if transient says force fallback
-			$force_primary = get_transient( 'post_smtp_force_primary_connection' );
-			if ( $force_primary !== false && (int) $force_primary === 0 ) {
-				$connections = get_option( 'postman_connections', array() );
-				return array_key_last( $connections );
-			}
-
-			// ✅ 3. Use saved primary connection from options
-			if ( isset( $this->options[ PostmanOptions::PRIMARY_CONNECTION ] ) ) {
-				return $this->options[ PostmanOptions::PRIMARY_CONNECTION ];
-			}
-        }
-
-		public function getSelectedPrimaryName() {
-			$connections = get_option( 'postman_connections', array() );
-
-			$primary_connection_index = $this->getSelectedPrimary();
-
-			if ( isset( $connections[ $primary_connection_index ] ) ) {
-				return isset( $connections[ $primary_connection_index] [ 'provider' ] ) ? 
-					$connections[ $primary_connection_index ][ 'provider' ] : null;
-			}
-
-			return null;
 		}
-
-		public function getSelectedFallbackName() {
-			$connections = get_option( 'postman_connections', array() );
-
-			$fallback_connection_index = $this->getSelectedFallback();
-
-			if ( isset( $connections[ $fallback_connection_index ] ) ) {
-				return isset( $connections[ $fallback_connection_index] [ 'provider' ] ) ? 
-					$connections[ $fallback_connection_index ][ 'provider' ] : null;
-			}
-
-			return null;
-		}
-
-        public function getFallbackAuth() {
-            if ( isset( $this->options [ PostmanOptions::FALLBACK_SMTP_USE_AUTH ] ) ) {
-                return $this->options [ PostmanOptions::FALLBACK_SMTP_USE_AUTH ];
-            }
-        }
 
 		public function getFallbackUsername() {
 			if ( defined( 'POST_SMTP_FALLBACK_AUTH_USERNAME' ) ) {
@@ -605,7 +481,25 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options[ PostmanOptions::FALLBACK_SMTP_PASSWORD ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::FALLBACK_SMTP_PASSWORD ] );
+				$value = $this->options[ PostmanOptions::FALLBACK_SMTP_PASSWORD ];
+
+				// First decode
+				$decoded = base64_decode( $value, true );
+
+				// If decoding fails, return as is
+				if ( $decoded === false ) {
+					return $value;
+				}
+
+				// Check if it looks like another base64 string (only base64 chars and length multiple of 4)
+				if ( preg_match( '/^[A-Za-z0-9\/\r\n+]*={0,2}$/', $decoded ) && strlen( $decoded ) % 4 === 0 ) {
+					$double_decoded = base64_decode( $decoded, true );
+					if ( $double_decoded !== false ) {
+						return $double_decoded;
+					}
+				}
+
+				return $decoded;
 			}
 
 			return null;
@@ -620,7 +514,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options [ PostmanOptions::MANDRILL_API_KEY ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::MANDRILL_API_KEY ] ); }
+				return base64_decode( $this->options [ PostmanOptions::MANDRILL_API_KEY ] ); }
 		}
 		public function getSendGridApiKey() {
 			if ( defined( 'POST_SMTP_API_KEY' ) ) {
@@ -628,14 +522,14 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options [ PostmanOptions::SENDGRID_API_KEY ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::SENDGRID_API_KEY ] ); }
+				return base64_decode( $this->options [ PostmanOptions::SENDGRID_API_KEY ] ); }
 		}
 		public function getMailerSendApiKey() {
 			if ( defined( 'POST_SMTP_API_KEY' ) ) {
 				return POST_SMTP_API_KEY;
 			}
 			if ( isset( $this->options [ PostmanOptions::MAILERSEND_API_KEY ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::MAILERSEND_API_KEY ] );
+				return base64_decode( $this->options [ PostmanOptions::MAILERSEND_API_KEY ] );
 			}
 		}
 
@@ -667,7 +561,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options [ PostmanOptions::MAILGUN_API_KEY ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::MAILGUN_API_KEY ] ); }
+				return base64_decode( $this->options [ PostmanOptions::MAILGUN_API_KEY ] ); }
 		}
 		public function getMailgunDomainName() {
 			if ( isset( $this->options [ PostmanOptions::MAILGUN_DOMAIN_NAME ] ) ) {
@@ -727,7 +621,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 		}
 
 		if ( isset( $this->options[PostmanOptions::SENDINBLUE_API_KEY] ) ) {
-			return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::SENDINBLUE_API_KEY ] );
+			return base64_decode( $this->options[PostmanOptions::SENDINBLUE_API_KEY] );
 		}
 
 	}
@@ -744,7 +638,10 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			return POST_SMTP_API_KEY;
 		}
 
-		return $this->get_http_api_secret_from_option( PostmanOptions::MAILTRAP_API_KEY );
+		if ( isset( $this->options[PostmanOptions::MAILTRAP_API_KEY] ) ) {
+			return base64_decode( $this->options[PostmanOptions::MAILTRAP_API_KEY] );
+		}
+
 	}
 
 	/**
@@ -756,7 +653,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
             }
 
 			if ( isset( $this->options[ PostmanOptions::EMAILIT_API_KEY ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::EMAILIT_API_KEY ] );
+				return base64_decode( $this->options[ PostmanOptions::EMAILIT_API_KEY ] );
 			}
 			return null;
 		}
@@ -766,12 +663,15 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 		 * @return string|null
 		 */
 		public function getMailerooApiKey() {
-
+            
 			if ( defined( 'POST_SMTP_API_KEY' ) ) {
 				return POST_SMTP_API_KEY;
 			}
 
-			return $this->get_http_api_secret_from_option( PostmanOptions::MAILEROO_API_KEY );
+			if ( isset( $this->options[ PostmanOptions::MAILEROO_API_KEY ] ) ) {
+				return base64_decode( $this->options[ PostmanOptions::MAILEROO_API_KEY ] );
+			}
+			return null;
 		}
 		
 
@@ -787,7 +687,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options[ PostmanOptions::SWEEGO_API_KEY ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::SWEEGO_API_KEY ] );
+				return base64_decode( $this->options[ PostmanOptions::SWEEGO_API_KEY ] );
 			}
 			return null;
 		}
@@ -805,10 +705,84 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
             }
 
             if ( isset( $this->options[PostmanOptions::RESEND_API_KEY] ) ) {
-                return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::RESEND_API_KEY ] );
+                return base64_decode( $this->options[PostmanOptions::RESEND_API_KEY] );
             }
 
         }
+
+		/**
+		 * Get Cloudflare API token.
+		 *
+		 * @since 3.2.0
+		 * @version 1.0
+		 *
+		 * @return string|null
+		 */
+		public function getCloudflareApiToken() {
+
+			if ( defined( 'POST_SMTP_API_KEY' ) ) {
+				return POST_SMTP_API_KEY;
+			}
+
+			if ( isset( $this->options[PostmanOptions::CLOUDFLARE_API_TOKEN] ) ) {
+				return base64_decode( $this->options[PostmanOptions::CLOUDFLARE_API_TOKEN] );
+			}
+
+			return null;
+		}
+
+		/**
+		 * Get Cloudflare account id.
+		 *
+		 * @since 3.2.0
+		 * @version 1.0
+		 *
+		 * @return string|null
+		 */
+		public function getCloudflareAccountId() {
+			if ( isset( $this->options[PostmanOptions::CLOUDFLARE_ACCOUNT_ID] ) ) {
+				return $this->options[PostmanOptions::CLOUDFLARE_ACCOUNT_ID];
+			}
+
+			return null;
+		}
+
+		/**
+		 * Get SMTP.com API key.
+		 *
+		 * @since 4.0.0
+		 * @version 1.0
+		 *
+		 * @return string|null
+		 */
+		public function getSmtpcomApiKey() {
+
+			if ( defined( 'POST_SMTP_API_KEY' ) ) {
+				return POST_SMTP_API_KEY;
+			}
+
+			if ( isset( $this->options[PostmanOptions::SMTPCOM_API_KEY] ) ) {
+				return base64_decode( $this->options[PostmanOptions::SMTPCOM_API_KEY] );
+			}
+
+			return null;
+		}
+
+		/**
+		 * Get SMTP.com channel.
+		 *
+		 * @since 4.0.0
+		 * @version 1.0
+		 *
+		 * @return string|null
+		 */
+		public function getSmtpcomChannel() {
+			if ( isset( $this->options[PostmanOptions::SMTPCOM_CHANNEL] ) ) {
+				return $this->options[PostmanOptions::SMTPCOM_CHANNEL];
+			}
+
+			return null;
+		}
 
 		/**
 		 * Gets Mailjet API key
@@ -823,7 +797,10 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 				return POST_SMTP_API_KEY;
 			}
 
-			return $this->get_http_api_secret_from_option( PostmanOptions::MAILJET_API_KEY );
+			if ( isset( $this->options[PostmanOptions::MAILJET_API_KEY] ) ) {
+				return base64_decode( $this->options[PostmanOptions::MAILJET_API_KEY] );
+			}
+
 		}
 
 		/**
@@ -838,7 +815,10 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 				return POST_SMTP_API_KEY;
 			}
 
-			return $this->get_http_api_secret_from_option( PostmanOptions::SENDPULSE_API_KEY );
+			if ( isset( $this->options[PostmanOptions::SENDPULSE_API_KEY] ) ) {
+				return base64_decode( $this->options[PostmanOptions::SENDPULSE_API_KEY] );
+			}
+
 		}
 
 		/**
@@ -853,7 +833,10 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 				return POST_SMTP_API_KEY;
 			}
 
-			return $this->get_http_api_secret_from_option( PostmanOptions::MAILJET_SECRET_KEY );
+			if ( isset( $this->options[PostmanOptions::MAILJET_SECRET_KEY] ) ) {
+				return base64_decode( $this->options[PostmanOptions::MAILJET_SECRET_KEY] );
+			}
+
 		}
 
 		/**
@@ -868,7 +851,10 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 				return POST_SMTP_SECRET_KEY;
 			}
 
-			return $this->get_http_api_secret_from_option( PostmanOptions::SENDPULSE_SECRET_KEY );
+			if ( isset( $this->options[PostmanOptions::SENDPULSE_SECRET_KEY] ) ) {
+				return base64_decode( $this->options[PostmanOptions::SENDPULSE_SECRET_KEY] );
+			}
+
 		}
 
 		/**
@@ -884,7 +870,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 		
 			if ( isset( $this->options[PostmanOptions::SPARKPOST_API_KEY] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::SPARKPOST_API_KEY ] );
+				return base64_decode( $this->options[PostmanOptions::SPARKPOST_API_KEY] );
 			}
 		
 		}
@@ -900,7 +886,10 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 				return POST_SMTP_API_KEY;
 			}
 
-			return $this->get_http_api_secret_from_option( PostmanOptions::ELASTICEMAIL_API_KEY );
+			if ( isset( $this->options[PostmanOptions::ELASTICEMAIL_API_KEY] ) ) {
+				return base64_decode( $this->options[PostmanOptions::ELASTICEMAIL_API_KEY] );
+			}
+
 		}
 
 		/**
@@ -1048,7 +1037,7 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options[PostmanOptions::POSTMARK_API_KEY] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::POSTMARK_API_KEY ] );
+				return base64_decode( $this->options[PostmanOptions::POSTMARK_API_KEY] );
 			}
 
 		}
@@ -1081,113 +1070,8 @@ if ( ! class_exists( 'PostmanOptions' ) ) {
 			}
 
 			if ( isset( $this->options[ PostmanOptions::SMTP2GO_API_KEY ] ) ) {
-				return $this->decode_option_secret_for_read( $this->options[ PostmanOptions::SMTP2GO_API_KEY ] );
+				return base64_decode( $this->options [ PostmanOptions::SMTP2GO_API_KEY ] );
 			}
-		}
-
-		/**
-		 * Get the last Zoho credentials from connections
-		 * Intelligently finds Zoho-specific connections first, then falls back to any connection
-		 * 
-		 * @since 2.7.0
-		 * @version 1.0.0
-		 * @param array $mail_connections Array of mail connections
-		 * @return array Array with 'client_id' and 'client_secret' keys, empty strings if not found
-		 */
-		public static function get_last_zoho_credentials( $mail_connections ) {
-			if ( empty( $mail_connections ) || !is_array( $mail_connections ) ) {
-				return array( 'client_id' => '', 'client_secret' => '' );
-			}
-			
-			// Reverse loop through connections to find the last one with Zoho credentials
-			$reversed_connections = array_reverse( $mail_connections, true );
-
-			foreach ( $reversed_connections as $connection ) {
-				if ( isset( $connection['provider'] ) && $connection['provider'] === 'zohomail_api' &&
-					( ! empty( $connection['zohomail_client_id'] ) || ! empty( $connection['zohomail_client_secret'] ) ) ) {
-					return array(
-						'client_id'     => $connection['zohomail_client_id'] ?? '',
-						'client_secret' => $connection['zohomail_client_secret'] ?? ''
-					);
-				}
-			}
-			
-			// If no Zoho connection found, return the last connection's Zoho fields (even if empty)
-			$last_connection = end( $mail_connections );
-			return array(
-				'client_id'     => $last_connection['zohomail_client_id'] ?? '',
-				'client_secret' => $last_connection['zohomail_client_secret'] ?? ''
-			);
-		}
-
-		/**
-		 * Get the last Office 365 credentials from connections
-		 * Intelligently finds Office 365-specific connections first, then falls back to any connection
-		 * 
-		 * @since 2.7.0
-		 * @version 1.0.0
-		 * @param array $mail_connections Array of mail connections
-		 * @return array Array with 'app_client_id' and 'app_client_secret' keys, empty strings if not found
-		 */
-		public static function get_last_office365_credentials( $mail_connections ) {
-			if ( empty( $mail_connections ) || !is_array( $mail_connections ) ) {
-				return array( 'office365_app_id' => '', 'office365_app_password' => '' );
-			}
-			
-			// Reverse loop through connections to find the last one with Office 365 credentials
-			$reversed_connections = array_reverse( $mail_connections, true );
-
-			foreach ( $reversed_connections as $connection ) {
-				if ( isset( $connection['provider'] ) && $connection['provider'] === 'office365_api' &&
-					( ! empty( $connection['office365_app_id'] ) || ! empty( $connection['office365_app_password'] ) ) ) {
-					return array(
-						'office365_app_id'       => $connection['office365_app_id'] ?? '',
-						'office365_app_password' => $connection['office365_app_password'] ?? ''
-					);
-				}
-			}
-			
-			// If no Office 365 connection found, return the last connection's Office 365 fields (even if empty)
-			$last_connection = end( $mail_connections );
-			return array(
-				'office365_app_id'       => $last_connection['office365_app_id'] ?? '',
-				'office365_app_password' => $last_connection['office365_app_password'] ?? ''
-			);
-		}
-
-		/**
-		 * Get the last Gmail credentials from connections
-		 * Intelligently finds Gmail-specific connections first, then falls back to any connection
-		 * 
-		 * @since 2.7.0
-		 * @version 1.0.0
-		 * @param array $mail_connections Array of mail connections
-		 * @return array Array with 'client_id' and 'client_secret' keys, empty strings if not found
-		 */
-		public static function get_last_gmail_credentials( $mail_connections ) {
-			if ( empty( $mail_connections ) || !is_array( $mail_connections ) ) {
-				return array( 'client_id' => '', 'client_secret' => '' );
-			}
-			
-			// Reverse loop through connections to find the last one with Gmail credentials
-			$reversed_connections = array_reverse( $mail_connections, true );
-
-			foreach ( $reversed_connections as $connection ) {
-				if ( isset( $connection['provider'] ) && $connection['provider'] === 'gmail_api' &&
-					( ! empty( $connection['oauth_client_id'] ) || ! empty( $connection['oauth_client_secret'] ) ) ) {
-					return array(
-						'client_id'     => $connection['oauth_client_id'] ?? '',
-						'client_secret' => $connection['oauth_client_secret'] ?? ''
-					);
-				}
-			}
-			
-			// If no Gmail connection found, return the last connection's OAuth fields (even if empty)
-			$last_connection = end( $mail_connections );
-			return array(
-				'client_id'     => $last_connection['oauth_client_id'] ?? '',
-				'client_secret' => $last_connection['oauth_client_secret'] ?? ''
-			);
 		}
 	}
 }

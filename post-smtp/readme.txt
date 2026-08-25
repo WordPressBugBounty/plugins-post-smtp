@@ -4,8 +4,8 @@ Contributors: wpexpertsio
 Tags: smtp, gmail smtp, email,  email logs, office 365
 Requires at least: 5.6.0
 Tested up to: 7.0
-Stable tag: 3.9.5
-Requires PHP: 7.0
+Stable tag: 4.0.1
+Requires PHP: 7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,6 +93,10 @@ Preview Any Email: You can preview your emails and see how it looks.
 
 == SMTP Mailer Options for Post SMTP ==
 With Post SMTP, you get many SMTP mailer options, such as:
+
+* [SMTP.com SMTP](https://www.smtp.com/resources/api-documentation/) - **Newly Added**
+
+* [CloudFlare SMTP](https://developers.cloudflare.com/email-service/api/send-emails/smtp/) - **Newly Added**
 
 * [Sweego SMTP](https://postmansmtp.com/docs/mailers/how-to-setup-sweego-with-post-smtp/?utm_source=wp_org&utm_medium=read_me) - **Newly Added**
 
@@ -324,13 +328,44 @@ Important: If you are using version 2.8.7 or lower of our plugin, please update 
 
 == Changelog ==
 
-= 3.9.3 - May 24, 2026 =
-* Rolled back to version 3.9.1 due to socket related errors.
+= 4.0.1 - Aug 25, 2026 =
+* Rolled back from 4.0.0-beta.1
+
+= 3.10.0 - Aug 24, 2026 =
+* NEW - Added [SMTP.com](https://www.smtp.com/) as an email service provider.
+* NEW - Added [CloudFlare](https://developers.cloudflare.com/email-service/api/send-emails/smtp/) as an email service provider.
+* IMPROVEMENT - Updated Sweego API.
+* IMPROVEMENT - Verified compatibility with WordPress v 7.1.
+* FIX - Resolved issue where newsletter emails were rendered incorrectly via Microsoft 365 API.
+* FIX - Fixed critical error when sending Wordfence Admin Authentication emails.
+* FIX - Resolved PHP 8.3 depreciation warnings.
+* FIX - Fixed fatal error occurring on the configuration page for version 3.7.0.
+* FIX - Fixed issue where the Resend feature sent raw HTML instead of rendered emails.
+* FIX - Corrected delivery time in logs to match WordPress timezone settings.
+* FIX - Added missing angle brackets in Message-ID header to prevent Google Workspace bounces.
+* FIX - Resolved issue where Reply-to settings were not being honored.
+* FIX - Fixed Cyrillic domain support issues.
+* FIX - Addressed various PHP warnings and minor UI/UX improvements.
+
+= 3.9.5 – June 24, 2026 =
+* TWEAK – Updated dashboard banners and removed the Extensions screen from the plugin menu.
+
+= 3.9.4 – June 03, 2026 =
+* FIX – Resolved failed builds reported by Plugintests.com
+* FIX – Addressed PHP deprecation notices related to using null as an array offset
+* FIX – Fixed compatibility issues with the Google Site Kit plugin
+* FIX – Resolved Elastic Email API errors causing `Code: 400, Message: Bad Request` due to missing required parameters
+* FIX – Addressed PHP 8 deprecation warnings for improved compatibility
+* FIX – Resolved a fatal error occurring when accessing `Post SMTP → Settings`
+* FIX – Improved compatibility with WordPress 7.0 & resolve issues of 3.9.2 version
+
+= 3.9.3 – May 24, 2026 =
+* TWEAK – Rolled back to version 3.9.1 due to socket-related errors.
 
 = 3.9.2 – May 22, 2026 =
-* TWEAK - Added WordPress 7.0 Compatibility.
-* FIX – Addressed PHP deprecation notice related to using null as an array offset
-* FIX – Fixed compatibility issue with the Google Site Kit plugin
+* TWEAK – Added WordPress 7.0 compatibility.
+* FIX – Addressed PHP deprecation notices related to using null as an array offset.
+* FIX – Fixed compatibility issues with the Google Site Kit plugin.
 
 = 3.9.1 – April 01, 2026 =
 * TWEAK – Updated Emailit API to v2.

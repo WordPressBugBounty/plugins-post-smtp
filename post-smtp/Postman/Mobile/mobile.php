@@ -85,11 +85,29 @@ class Post_SMTP_Mobile {
      * @version 1.0.0
      */
     public function add_menu() {
+
+        if( postman_is_bfcm() ) {
+
+            $menu_text = sprintf( 
+            '%s<span class="dashicons dashicons-smartphone">', 
+        __( 'Mobile App', 'post-smtp' )
+            );
+
+        }
+        else {
+
+            $menu_text = sprintf( 
+            '%s<span class="dashicons dashicons-smartphone"></span><span class="menu-counter">%s</span>', 
+        __( 'Mobile App', 'post-smtp' ), 
+                __( 'New', 'post-smtp' ) 
+            );
+
+        }
         
         add_submenu_page( 
             PostmanViewController::POSTMAN_MENU_SLUG, 
             __( 'Mobile Application', 'post-smtp' ), 
-            sprintf( '%s<span class="dashicons dashicons-smartphone"></span><span class="menu-counter">%s</span>', __( 'Mobile App', 'post-smtp' ), __( 'New', 'post-smtp' ) ),
+            $menu_text,
             'manage_options', 
             admin_url( 'admin.php?page=postman/configuration#mobile-app' ),
             '',
@@ -140,8 +158,11 @@ class Post_SMTP_Mobile {
     /**
      * Generate QR code
      *
+     * Safely loads the bundled PHPQRCode library and avoids fatals if another
+     * plugin/theme has defined an incompatible QRcode class.
+     *
      * @since 2.7.0
-     * @version 1.0.0
+     * @version 1.1.0
      */
     public function generate_qr_code() {
 
@@ -151,18 +172,23 @@ class Post_SMTP_Mobile {
             return;
         }
 
-        $nonce = get_transient( 'post_smtp_auth_nonce' );
-		$authkey = $nonce ? $nonce : $this->generate_auth_key();
-		$site_title = get_bloginfo( 'name' );
+        $nonce      = get_transient( 'post_smtp_auth_nonce' );
+        $authkey    = $nonce ? $nonce : $this->generate_auth_key();
+        $site_title = get_bloginfo( 'name' );
+
         set_transient( 'post_smtp_auth_nonce', $authkey, 1800 );
+
         $endpoint = site_url( "?authkey={$authkey}&site_title={$site_title}" );
+
         ob_start();
         $qr_class::png( urlencode_deep( $endpoint ) );
         $result_qr_content_in_png = ob_get_contents();
         ob_end_clean();
-        // PHPQRCode change the content-type into image/png... we change it again into html
-        header("Content-type: text/html");
-        $this->qr_code =  base64_encode( $result_qr_content_in_png );
+
+        // PHPQRCode changes the content-type to image/png; restore HTML.
+        header( 'Content-type: text/html' );
+
+        $this->qr_code = base64_encode( $result_qr_content_in_png );
 
     }
 
@@ -188,6 +214,8 @@ class Post_SMTP_Mobile {
      * @version 1.0.0
      */
     public function section() {
+
+        $nonce = wp_create_nonce( 'ps-regenerate-qrcode-nonce' );
 
         //Incompatible server
         if( function_exists( 'ImageCreate' ) ):
@@ -218,13 +246,12 @@ class Post_SMTP_Mobile {
                         And you are done👍.
                     </p>
                     <p>
-                        Want more details? Check out our complete guide <a href="https://postmansmtp.com/documentation/advance-functionality/postsmtp-mobile-app" target="_blank">Post SMTP Plugin with Mobile App</a>
+                        Want more details? Check out our complete guide <a href="https://postmansmtp.com/documentation/post-smtp-mobile-app/download-the-app-and-connect-with-plugin/?utm_source=plugin&utm_medium=settings" target="_blank">Post SMTP Plugin with Mobile App</a>
                     </p>
                 </div>
                 <div class="mobile-app-internal-box ps-qr-box" style="line-height: 30px;">
                     <?php 
                     if( !$this->app_connected ) {
-                        $nonce = wp_create_nonce( 'ps-regenerate-qrcode' );
                         if ( $this->qr_code !== null ) {
                             echo '<img src="data:image/png;base64,' . esc_attr( $this->qr_code ) . '" width="300"/>';
                             ?>
@@ -415,10 +442,13 @@ class Post_SMTP_Mobile {
      */
     public function regenerate_qrcode() {
 
+        if( ! isset( $_GET['_psnonce'] ) || ! wp_verify_nonce( $_GET['_psnonce'], 'ps-regenerate-qrcode-nonce' ) ) {
+
+            die( 'Security Check' );
+
+        }
+
         if( isset( $_GET['action'] ) && $_GET['action'] === 'regenerate-qrcode' ) {
-            if ( ! isset( $_GET['_psnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_psnonce'] ) ), 'ps-regenerate-qrcode' ) ) {
-                wp_die( 'Security check' );
-            }
 
             delete_transient( 'post_smtp_auth_nonce' );
 

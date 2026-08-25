@@ -284,12 +284,8 @@ class PostmanEmailLogs {
         }
 
         if( !$this->db->last_error ) {
-            $existing_options = get_option( PostmanOptions::POSTMAN_OPTIONS );
-            if ( !empty( $existing_options ) ) {
-                update_option( 'postman_db_version', POST_SMTP_DB_VERSION );
-            } else {
-                update_option( 'postman_db_version', '1.0.2' );
-            }
+
+            update_option( 'postman_db_version', POST_SMTP_DB_VERSION );
 
         }
 
@@ -331,7 +327,7 @@ class PostmanEmailLogs {
 
         if( !$this->db->last_error ) {
 
-            update_option( 'postman_db_version', '1.0.1' );
+            update_option( 'postman_db_version', POST_SMTP_DB_VERSION );
 
         }
 
@@ -502,11 +498,6 @@ class PostmanEmailLogs {
             }
 
             $data = $logs_query->get_logs( $query );
-
-            usort( $data, function ( $a, $b ) {
-				return intval( $b->id ) <=> intval( $a->id );
-			});
-
             //WordPress Date, Time Format
             $date_format = get_option( 'date_format' );
 		    $time_format = get_option( 'time_format' );
@@ -526,9 +517,9 @@ class PostmanEmailLogs {
             //Lets manage the Date format :)
             foreach( $data as $row ) {
 
-                $row->time = date( "{$date_format} {$time_format}", $row->time );
+                $row->time = date_i18n( "{$date_format} {$time_format}", $row->time );
 
-                if( $row->success == 1 ) { 
+                if( $row->success == 1 ) {
 
                     $row->success = '<span title="Success">Success</span>';
 
@@ -748,7 +739,7 @@ class PostmanEmailLogs {
                 $data[10] = $log->original_message;
                 $data[11] = $log->original_headers;
                 $data[12] = $log->session_transcript;
-                $data[13] = date( "$date_format $time_format", $log->time );
+                $data[13] = date_i18n( "$date_format $time_format", $log->time );
                 
                 fputcsv($fp, $data);
 
@@ -830,7 +821,7 @@ class PostmanEmailLogs {
 				$date_format = get_option( 'date_format' );
 				$time_format = get_option( 'time_format' );
 				
-				$log['time'] = date( "{$date_format} {$time_format}", $log['time'] );
+				$log['time'] = date_i18n( "{$date_format} {$time_format}", $log['time'] );
 
 			}
 

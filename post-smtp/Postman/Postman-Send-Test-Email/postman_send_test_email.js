@@ -1,6 +1,18 @@
 ( function( $ ) {
 	$( document ).ready( function( $e ) {
 
+		$( '#postman_test_email_wizard' ).on( 'submit', function( e ) {
+			e.preventDefault();
+			$( '.send-test-email .ps-next-button' ).trigger( 'click' );
+		} );
+
+		$( document ).on( 'keydown', '#postman_test_options_test_email', function( e ) {
+			if ( e.key === 'Enter' || e.keyCode === 13 ) {
+				e.preventDefault();
+				$( '.send-test-email .ps-next-button' ).trigger( 'click' );
+			}
+		} );
+
 		$( document ).on( 'click', '.send-test-email .ps-next-button', function( e ) {
 			e.preventDefault();
 
@@ -22,18 +34,13 @@
 					action	 : 'postman_send_test_email',
 					security : security,
 					email	 : email,
-					primary  : '1' // Set primary to 1 for the test email.
 				},
 				success : function( response ) {
+					$( '.show-when-email-sent' ).css( 'display', 'block' );
 					$( '#when-button-clicked' ).removeClass( 'is-active' ).css( 'display', 'none' );
 					$this.removeAttr( 'disabled' );
 					if ( ! response.success ) {
-						let message = 'Test email failed. Please check your settings and try again.';
-						
-						if ( response.data && typeof response.data.message === 'string' && response.data.message.trim() !== '' ) {
-							message = response.data.message;
-						}
-						
+						var message = response.data.message;
 						var icon    = '<span class="dashicons dashicons-no-alt"></span>';
 						$( '.send-test-email .ps-success' ).empty();
 						$( '.send-test-email .ps-error' ).html( icon + message );

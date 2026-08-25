@@ -49,25 +49,17 @@ if ( ! class_exists( 'PostmanZendMailEngine' ) ) {
 
 		private $transport;
 
-		private $fallback_flag;
-
 		/**
 		 *
 		 * @param mixed $senderEmail
 		 * @param mixed $accessToken
 		 */
-		function __construct( PostmanZendModuleTransport $transport, $fallback_flag ) {
+		function __construct( PostmanZendModuleTransport $transport ) {
 			assert( isset( $transport ) );
 			$this->transport = $transport;
 
 			// create the logger
 			$this->logger = new PostmanLogger( get_class( $this ) );
-
-			if ( $fallback_flag ) {
-				$this->fallback_flag = $fallback_flag['is_fallback'] ?? null;
-			} else {
-				$this->fallback_flag = null;
-			}
 		}
 
 		/**
@@ -77,29 +69,7 @@ if ( ! class_exists( 'PostmanZendMailEngine' ) ) {
 		 */
 		public function send( PostmanMessage $message ) {
 			$this->logger->debug( 'Prepping Zend' );
-			$options = PostmanOptions::getInstance();
-
-			if ( Postman_Connection_Resolver::is_legacy_mode() ) {
-				$sender = $this->transport->getFromEmailAddress();
-			} else {
-				$connection_details = get_option( 'postman_connections' );
-				if ( $this->fallback_flag == null ) {
-					$route_key = null;
-					$route_key = get_transient( 'post_smtp_smart_routing_route' );
-					if( $route_key != null ){
-						$sender     = $connection_details[ $route_key ]['sender_email'];
-					}else{
-						$primary     = $options->getSelectedPrimary();
-						$sender = $connection_details[ $primary ]['sender_email'];
-					}
-				} else {
-					$fallback    = $options->getSelectedFallback();
-					$sender = $connection_details[ $fallback ]['sender_email'];
-				}
-			}
-
-			$envelopeFrom = new PostmanEmailAddress( $sender );
-
+			$envelopeFrom = new PostmanEmailAddress( $this->transport->getEnvelopeFromEmailAddress() );
 			if ( $this->transport->isEnvelopeFromValidationSupported() ) {
 				// validate the envelope from since we didn't do it in the Message
 				$envelopeFrom->validate( 'Envelope From' );
@@ -128,11 +98,12 @@ if ( ! class_exists( 'PostmanZendMailEngine' ) ) {
 				$mail->addHeader( 'Content-Type', $contentType, false );
 				$this->logger->debug( 'Adding content-type ' . $contentType );
 			}
-	
+
 			// add the From Header
 			$fromHeader = $this->addFrom( $message, $mail );
-	
 			$fromHeader->log( $this->logger, 'From' );
+
+			$sender = $this->transport->getFromEmailAddress();
 
 			/**
 			 * If Sender and From are not same thn ADD Sender, otherwise do not add Sender
@@ -216,13 +187,9 @@ if ( ! class_exists( 'PostmanZendMailEngine' ) ) {
 
 			// create the SMTP transport
 			$this->logger->debug( 'Create the Zend_Mail transport' );
-			if ( Postman_Connection_Resolver::is_legacy_mode() ) {
-				$zendTransport = $this->transport->createZendMailTransport( $this->transport->getHostname(), array() );
-			}else{
-				$zendTransport = $this->transport->createZendMailTransport( $this->transport->getHostname(), $this->fallback_flag );
-			}
-            
-			$transport = $this->transport instanceof PostmanDefaultModuleTransport ? null : $zendTransport;
+			$zendTransport = $this->transport->createZendMailTransport( $this->transport->getHostname(), array() );
+
+            $transport = $this->transport instanceof PostmanDefaultModuleTransport ? null : $zendTransport;
 
 			try {
 				// send the message
@@ -242,7 +209,6 @@ if ( ! class_exists( 'PostmanZendMailEngine' ) ) {
 					$this->transcript = $zendTransport->getMessage();
 				}
 			} catch ( Exception $e ) {
-				
 				// finally not supported??
 				if ( $zendTransport->getConnection() && ! PostmanUtils::isEmpty( $zendTransport->getConnection()->getLog() ) ) {
 					$this->transcript = $zendTransport->getConnection()->getLog();
@@ -276,30 +242,9 @@ if ( ! class_exists( 'PostmanZendMailEngine' ) ) {
 		 */
 		public function addFrom( PostmanMessage $message, Postman_Zend_Mail $mail ) {
 			$sender = $message->getFromAddress();
-			$options = PostmanOptions::getInstance();
 			// now log it and push it into the message
-			if ( Postman_Connection_Resolver::is_legacy_mode() ) {
-				$senderEmail = $sender->getEmail();
-				$senderName = $sender->getName();
-			}else{
-				$connection_details = get_option( 'postman_connections' );
-				if ( $this->fallback_flag == null ) {
-					$route_key = null;
-					$route_key = get_transient( 'post_smtp_smart_routing_route' );
-					if( $route_key != null ){
-						$senderName   = $connection_details[ $route_key ]['sender_name'];
-						$senderEmail   = $connection_details[ $route_key ]['sender_email'];
-					}else{
-						$primary = $options->getSelectedPrimary();
-						$senderName   = $connection_details[ $primary ]['sender_name'];
-						$senderEmail   = $connection_details[ $primary ]['sender_email'];
-					}
-				} else {
-					$fallback = $options->getSelectedFallback();
-					$senderName   = $connection_details[ $fallback ]['sender_name'];
-					$senderEmail   = $connection_details[ $fallback ]['sender_email'];
-				}
-			}
+			$senderEmail = $sender->getEmail();
+			$senderName = $sender->getName();
 			assert( ! empty( $senderEmail ) );
 			if ( ! empty( $senderName ) ) {
 				$mail->setFrom( $senderEmail, $senderName );
