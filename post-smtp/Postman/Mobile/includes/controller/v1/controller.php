@@ -72,7 +72,11 @@ class Post_SMTP_Mobile_Controller {
 	}
 	
 	public function push_notification( $log, $postmanMessage, $transcript, $transport, $errorMessage ) {
-		
+
+		if ( ! class_exists( 'PostmanNotify' ) || ! PostmanNotify::should_send_failure_notification( $postmanMessage ) ) {
+			return;
+		}
+
 		$site_title = get_bloginfo( 'name' );
 		$title = '🚫 Email failed';
 		$title = !empty( $site_title ) ? "{$title} - {$site_title}" : $title;
