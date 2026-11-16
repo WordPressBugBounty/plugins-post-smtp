@@ -542,18 +542,22 @@ jQuery(document).ready(function () {
     });
 
 
-    // Prevent implicit form submission from navigating away from the current step.
-    jQuery('#ps-wizard-form').on('submit', function (e) {
-        e.preventDefault();
-    });
-
-    // Pressing Enter in the recipient field should send the test email, not submit the wizard form.
-    jQuery(document).on('keydown', '#ps-wizard-form .ps-test-to', function (e) {
-        if (e.key === 'Enter' || e.keyCode === 13) {
+    var $wizardForm = jQuery('#ps-wizard-form');
+    if ($wizardForm.length) {
+        // Prevent implicit form submission from navigating away from the current step.
+        $wizardForm.on('submit', function (e) {
             e.preventDefault();
-            jQuery('.ps-wizard-send-test-email:visible').trigger('click');
-        }
-    });
+        });
+
+        // Pressing Enter in the recipient field should send the test email, not submit the wizard form.
+        $wizardForm.on('keydown', 'input.ps-test-to', function (e) {
+            if (e.key !== 'Enter' && e.keyCode !== 13) {
+                return;
+            }
+            e.preventDefault();
+            $wizardForm.find('.ps-wizard-send-test-email:visible').trigger('click');
+        });
+    }
 
     //Send test email
     jQuery(document).on('click', '.ps-wizard-send-test-email', function (e) {
@@ -702,7 +706,7 @@ jQuery(document).ready(function () {
                                                 <b>DMARC record status: <span class="${dmarcStatus}">${dmarc}</span></b>
                                                 <p>DMARC record description: ${dmarcDescription}</p>
                                             </div>
-                                            <b class="ps-dns-footer">To check and improve your email spam score! <a href="https://postmansmtp.com/domain-health-checker/?utm_source=plugin&utm_medium=test_email_dns_check&utm_campaign=plugin" target="_blank">Click Here</a><span class="dashicons dashicons-external"></span></b>
+                                            <b class="ps-dns-footer">To check and improve your email spam score! <a href="${PostSMTPWizard.dnsCheckUrl}" target="_blank">Click Here</a><span class="dashicons dashicons-external"></span></b>
                                         </div>`;
                                 if (jQuery('#ps-dns-results__el_id').length) {
                                     jQuery('#ps-dns-results__el_id').remove();
@@ -727,7 +731,7 @@ jQuery(document).ready(function () {
 
                                 jQuery('.ps-wizard-success:nth(0)').after(
                                     `<div id="ps-dns-results__el_id">
-                                            <b class="ps-dns-footer" style="padding-left: 12px;">Limit Exceed! To check and improve your email spam score! <a href="https://postmansmtp.com/domain-health-checker/?utm_source=plugin&utm_medium=test_email_dns_check&utm_campaign=plugin" target="_blank">Click Here</a><span class="dashicons dashicons-external"></span></b>
+                                            <b class="ps-dns-footer" style="padding-left: 12px;">Limit Exceed! To check and improve your email spam score! <a href="${PostSMTPWizard.dnsCheckUrl}" target="_blank">Click Here</a><span class="dashicons dashicons-external"></span></b>
                                         </div>`
                                 );
 
@@ -745,7 +749,7 @@ jQuery(document).ready(function () {
                                 jQuery('.ps-wizard-health-report').after(
                                     `<div id="ps-dns-results__el_id">
                                             <b class="ps-dns-footer" style="padding-left: 12px;">Limit Exceed! Please try again later. 
-                                            <a href="https://postmansmtp.com/domain-health-checker/?utm_source=plugin&utm_medium=test_email_dns_check&utm_campaign=plugin" target="_blank">Click Here</a>
+                                            <a href="${PostSMTPWizard.dnsCheckUrl}" target="_blank">Click Here</a>
                                             <span class="dashicons dashicons-external"></span></b>
                                         </div>`
                                 );

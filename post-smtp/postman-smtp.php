@@ -6,12 +6,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Plugin Name: Post SMTP
  * Plugin URI: https://postmansmtp.com/
  * Description: Email delivery issues? Post SMTP is a powerful WordPress SMTP plugin for reliable email delivery with Gmail, Outlook, Microsoft 365, Brevo, and more. Set up easily with the Configuration Wizard, Email Logs, test emails, and delivery troubleshooting. Enjoy secure, reliable WordPress email delivery even when passwords change!
- * Version: 4.0.2
+ * Version: 4.0.3
  * Author: Post SMTP
  * Text Domain: post-smtp
  * Author URI: https://profiles.wordpress.org/saadiqbal/
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ * Requires PHP: 7.1
  */
 
 /*
@@ -102,12 +103,12 @@ ps_fs()->add_filter( 'plugin_icon' , 'ps_fs_custom_icon' );
 define( 'POST_SMTP_BASE', __FILE__ );
 define( 'POST_SMTP_PATH', __DIR__ );
 define( 'POST_SMTP_URL', plugins_url('', POST_SMTP_BASE ) );
-define( 'POST_SMTP_VER', '4.0.2' );
+define( 'POST_SMTP_VER', '4.0.3' );
 define( 'POST_SMTP_DB_VERSION', '1.0.1' );
 define( 'POST_SMTP_ASSETS', plugin_dir_url( __FILE__ ) . 'assets/' );
 
 $postman_smtp_exist = in_array( 'postman-smtp/postman-smtp.php', (array) get_option( 'active_plugins', array() ) );
-$required_php_version = version_compare( PHP_VERSION, '5.6.0', '<' );
+$required_php_version = version_compare( PHP_VERSION, '7.1.0', '<' );
 
 if( ! function_exists( 'post_smtp_load_textdomain' ) ):
 function post_smtp_load_textdomain() {
@@ -151,7 +152,7 @@ function post_smtp_plugin_deactivate() {
 function post_smtp_plugin_admin_notice_version() {
 	echo '<div class="error">
 				<p>
-				<strong>Post SMTP</strong> plugin require at least PHP version 5.6, contact to your web hostig support to upgrade.
+				<strong>Post SMTP</strong> requires PHP 7.1 or newer. Contact your hosting provider to upgrade PHP.
 				</p>
 				<p>
 				<a href="https://secure.php.net/supported-versions.php">See supported versions on PHP.net</a>
@@ -196,7 +197,10 @@ function post_dismiss_not_configured() {
 }
 add_action( 'admin_footer', 'post_dismiss_not_configured' );
 
-function post_smtp_general_scripts() {
+function post_smtp_general_scripts( $hook ) {
+	if ( false === strpos( $hook, 'postman' ) ) {
+		return;
+	}
     $localize = include( POST_SMTP_PATH . '/Postman/Localize.php' );
     wp_register_script( 'post-smtp-localize', POST_SMTP_URL . '/script/localize.js', [], false );
     wp_localize_script( 'post-smtp-localize', 'post_smtp_localize', $localize );

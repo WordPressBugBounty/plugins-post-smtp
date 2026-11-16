@@ -260,7 +260,7 @@ class Post_SMTP_New_Wizard {
                                                     $slug = $transport_slug;
                                                     $transport_name = 'Microsoft 365';
                                                     $is_pro = 'ps-pro-extension';
-                                                    $product_url = postman_is_bfcm() ? 'https://postmansmtp.com/cyber-monday-sale?utm_source=plugin&utm_medium=section_name&utm_campaign=BFCM&utm_id=BFCM_2024' : 'https://postmansmtp.com/pricing/?utm_source=plugin&utm_medium=wizard_microsoft&utm_campaign=plugin';
+                                                    $product_url = post_smtp_wizard_upgrade_url( 'wizard_microsoft' );
 
                                                 }
                                               if( $transport_slug == 'zohomail_api' ) {
@@ -269,7 +269,7 @@ class Post_SMTP_New_Wizard {
                                                     $slug = $transport_slug;
                                                     $transport_name = 'Zoho';
                                                     $is_pro = 'ps-pro-extension';
-                                                    $product_url = postman_is_bfcm() ? 'https://postmansmtp.com/cyber-monday-sale?utm_source=plugin&utm_medium=section_name&utm_campaign=BFCM&utm_id=BFCM_2024' : 'https://postmansmtp.com/pricing/?utm_source=plugin&utm_medium=wizard_zoho&utm_campaign=plugin';
+                                                    $product_url = post_smtp_wizard_upgrade_url( 'wizard_zoho' );
 
                                                 }
                                                 if( !class_exists( 'Post_Smtp_Amazon_Ses' ) && $transport_slug == 'aws_ses_api' ) {
@@ -278,7 +278,7 @@ class Post_SMTP_New_Wizard {
                                                     $slug = $transport_slug;
                                                     $transport_name = 'Amazon SES';
                                                     $is_pro = 'ps-pro-extension';
-                                                    $product_url = postman_is_bfcm() ? 'https://postmansmtp.com/cyber-monday-sale?utm_source=plugin&utm_medium=section_name&utm_campaign=BFCM&utm_id=BFCM_2024' : 'https://postmansmtp.com/pricing/?utm_source=plugin&utm_medium=wizard_amazonses&utm_campaign=plugin';
+                                                    $product_url = post_smtp_wizard_upgrade_url( 'wizard_amazonses' );
 
                                                 }
 
@@ -436,8 +436,8 @@ class Post_SMTP_New_Wizard {
                                             <div class="ps-form-control">
                                                 <div><label><?php _e( 'Recipient Email Address', 'post-smtp' ) ?></label></div>
                                                 <input type="text" class="ps-test-to" required data-error="Enter Recipient Email Address" name="postman_test_options[test_email]" value="<?php echo esc_attr( wp_get_current_user()->user_email ); ?>" placeholder="Recipient Email Address">
-                                                <span class="ps-form-control-info"><?php _e( 'Enter the email address where you want to send a test email message.', 'post-smtp' ) ?></span>
-                                                <p style="color: #B3B3B3;" class="ps-form-control-info"><?php _e( 'Are your WordPress emails getting broken? Check out our guide on', 'post-smtp' ) ?> <a href="https://postmansmtp.com/fix-for-broken-emails/?utm_source=plugin&utm_medium=wizard&utm_campaign=plugin" target="_blank"><?php _e( 'how to fix Broken Emails', 'post-smtp' ) ?></a>.</p>
+                                                <div class="ps-form-control-info"><?php _e( 'Enter the email address where you want to send a test email message.', 'post-smtp' ) ?></div>
+                                                <p style="color: #B3B3B3;" class="ps-form-control-info"><?php _e( 'Are your WordPress emails getting broken? Check out our guide on', 'post-smtp' ) ?> <a href="<?php echo esc_url( post_smtp_utm_url( 'fix-for-broken-emails/', 'setup-wizard', 'wizard_fix-broken-emails' ) ); ?>" target="_blank"><?php _e( 'how to fix Broken Emails', 'post-smtp' ) ?></a>.</p>
                                             </div>
                                             <button type="button" class="button button-primary ps-blue-btn ps-wizard-send-test-email" data-step="3"><?php _e( 'Send Test Email', 'post-smtp' ) ?> <span class="dashicons dashicons-email"></span></button>
                                             <div>
@@ -567,10 +567,10 @@ class Post_SMTP_New_Wizard {
                                                 </div>
                                                 <div style="display: flex;">
                                                     <div class="ps-app-download-button">
-                                                        <a href="https://play.google.com/store/apps/details?id=com.postsmtp&referrer=utm_source%3Dplugin%26utm_medium%3Ddashboard%26utm_campaign%3Dplugin%26anid%3Dadmob" target="_blank"><img src="<?php echo esc_url( POST_SMTP_URL . '/Postman/Wizard/assets/images/androidicon.png' ); ?>"><div><p style="font-size: 8px;">Get it On</p><p style="font-size: 9px; font-weight: 750">Google Play</p></div></a>
+                                                        <a href="<?php echo esc_url( post_smtp_android_store_url( 'wizard_google-play', 'mobile-app' ) ); ?>" target="_blank"><img src="<?php echo esc_url( POST_SMTP_URL . '/Postman/Wizard/assets/images/androidicon.png' ); ?>"><div><p style="font-size: 8px;">Get it On</p><p style="font-size: 9px; font-weight: 750">Google Play</p></div></a>
                                                     </div>
                                                     <div class="ps-app-download-button">
-                                                        <a href="https://apps.apple.com/us/app/post-smtp/id6473368559?utm_source=plugin&utm_medium=dashboard&utm_campaign=plugin" target="_blank"><img src="<?php echo esc_url( POST_SMTP_URL . '/Postman/Wizard/assets/images/apple-icon.png' ); ?>"><div><p style="font-size: 8px;">Download on the</p><p style="font-size: 9px; font-weight: 750;">App Store</p></div></a>
+                                                        <a href="<?php echo esc_url( post_smtp_ios_store_url( 'wizard_app-store', 'mobile-app' ) ); ?>" target="_blank"><img src="<?php echo esc_url( POST_SMTP_URL . '/Postman/Wizard/assets/images/apple-icon.png' ); ?>"><div><p style="font-size: 8px;">Download on the</p><p style="font-size: 9px; font-weight: 750;">App Store</p></div></a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -643,7 +643,11 @@ class Post_SMTP_New_Wizard {
      * @since 2.7.0
      * @version 1.0.0
      */
-    public function enqueue_scripts() {
+    public function enqueue_scripts( $hook ) {
+
+        if ( ! $this->should_enqueue_wizard_assets( $hook ) ) {
+            return;
+        }
 
         $localized = array(
             'Step1E1'           => __( 'Select a socket type to continue.', 'post-smtp' ),
@@ -670,6 +674,7 @@ class Post_SMTP_New_Wizard {
             // Nonce and messages for Gmail One-Click auth AJAX
             'gmail_auth_nonce' => wp_create_nonce( 'ps_get_gmail_auth_url' ),
             'gmailAuthErrorText' => __( 'Failed to start Google authentication. Please reload the page and try again.', 'post-smtp' ),
+            'dnsCheckUrl'        => post_smtp_utm_url( 'domain-health-checker/', 'domain-health-checker', 'test_email_dns_check' ),
         );
 
         if( class_exists( 'Post_Smtp_Office365' ) ) {
@@ -713,6 +718,36 @@ class Post_SMTP_New_Wizard {
         );
         wp_localize_script( 'post-smtp-wizard', 'PostSMTPWizard', $localized );
 
+    }
+
+    /**
+     * Whether new-wizard CSS/JS should load on this admin request.
+     *
+     * The setup wizard is registered with a hidden parent menu slug (space), so WordPress
+     * uses the admin_page_* hook suffix — not postman_page_* — and a strict hook match
+     * skips wizard.css entirely (unstyled layout). Settings (postman/configuration) also
+     * needs wizard.css / wizard.js for the Gmail one-click PRO popup.
+     *
+     * @param string $hook Admin screen hook suffix from admin_enqueue_scripts.
+     * @return bool
+     */
+    private function should_enqueue_wizard_assets( $hook ) {
+        $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+
+        // Settings → Connections (Gmail one-click PRO popup uses wizard.css / wizard.js).
+        if ( PostmanConfigurationController::CONFIGURATION_SLUG === $page ) {
+            return true;
+        }
+
+        if ( PostmanConfigurationController::CONFIGURATION_WIZARD_SLUG !== $page ) {
+            return false;
+        }
+
+        if ( apply_filters( 'post_smtp_legacy_wizard', true ) ) {
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -969,9 +1004,7 @@ class Post_SMTP_New_Wizard {
         $one_click_class = 'ps-enable-gmail-one-click';
         $url = POST_SMTP_URL . '/Postman/Wizard/assets/images/wizard-google.png';
         $transport_name = __( '<strong>1-Click</strong> Google Mailer Setup?', 'post-smtp' );
-        $product_url = postman_is_bfcm() ? 
-            'https://postmansmtp.com/cyber-monday-sale?utm_source=plugin&utm_medium=section_name&utm_campaign=BFCM&utm_id=BFCM_2024' : 
-            'https://postmansmtp.com/pricing/?utm_source=plugin&utm_medium=wizard_gmail_one_click&utm_campaign=plugin';
+        $product_url = post_smtp_utm_pricing_url( 'wizard_gmail_one_click', 'gmail-one-click' );
     
     
         if ( isset( $_GET['success'] ) && $_GET['success'] == 1 ) {
@@ -1615,7 +1648,7 @@ class Post_SMTP_New_Wizard {
         $secret_key = null !== $this->options->getSendpulseSecretKey() ? esc_attr ( $this->options->getSendpulseSecretKey() ) : '';
 
 
-        $html = '<p>' . esc_html__( 'It is easy to integrate SendPulse mailer to your WordPress website. We recommend you to ', 'post-smtp' ) . '<a href="https://postmansmtp.com/documentation/sockets-addons/configure-post-smtp-with-sendpulse/?utm_source=plugin&utm_medium=wizard&utm_campaign=plugin" target="_blank">' . esc_html__( 'check the documentation', 'post-smtp' ) . '</a>' . esc_html__( ' for a successful integration.', 'post-smtp' ) . '</p>';
+        $html = '<p>' . esc_html__( 'It is easy to integrate SendPulse mailer to your WordPress website. We recommend you to ', 'post-smtp' ) . '<a href="' . esc_url( post_smtp_utm_url( 'documentation/sockets-addons/configure-post-smtp-with-sendpulse/', 'docs', 'wizard_sendpulse-docs' ) ) . '" target="_blank">' . esc_html__( 'check the documentation', 'post-smtp' ) . '</a>' . esc_html__( ' for a successful integration.', 'post-smtp' ) . '</p>';
         $html .= '<div class="ps-wizard-divider"></div>';
         $html .= '
         <div class="ps-form-control">
@@ -1733,9 +1766,7 @@ class Post_SMTP_New_Wizard {
         $one_click_class = 'ps-enable-office365-one-click';
         $url = POST_SMTP_URL . '/Postman/Wizard/assets/images/ms365.png';
         $transport_name = __( '<strong>One-Click</strong> Microsoft Mailer Setup?', 'post-smtp' );
-        $product_url = postman_is_bfcm() ? 
-            'https://postmansmtp.com/cyber-monday-sale?utm_source=plugin&utm_medium=section_name&utm_campaign=BFCM&utm_id=BFCM_2024' : 
-            'https://postmansmtp.com/pricing/?utm_source=plugin&utm_medium=wizard_microsoft&utm_campaign=plugin';
+        $product_url = post_smtp_wizard_upgrade_url( 'wizard_microsoft' );
 
         // Prepare data for JSON encoding
         $data = [
@@ -2025,6 +2056,15 @@ class Post_SMTP_New_Wizard {
      * @version 1.0.0
      */
     public function save_wizard() {
+
+        if ( ! current_user_can( Postman::MANAGE_POSTMAN_CAPABILITY_NAME ) ) {
+            wp_send_json_error(
+                array(
+                    'message' => __( 'You do not have permission to save Post SMTP settings.', 'post-smtp' ),
+                ),
+                403
+            );
+        }
 
         $form_data = array();
         if ( isset( $_POST['FormData'] ) ) {

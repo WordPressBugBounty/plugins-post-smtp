@@ -562,6 +562,32 @@ class Postman_Zend_Mail extends Postman_Zend_Mime_Message
     }
 
     /**
+     * Normalize a single address + optional name for addTo/addCc (PHP 8.5: null array keys deprecated).
+     *
+     * @param string|array $email
+     * @param string|null  $name
+     * @return array
+     */
+    protected function _normalizeRecipientList($email, $name = '')
+    {
+        if (is_array($email)) {
+            $normalized = array();
+            foreach ($email as $n => $recipient) {
+                if (null === $n || is_int($n)) {
+                    $normalized[] = $recipient;
+                } else {
+                    $normalized[ (string) $n ] = $recipient;
+                }
+            }
+            return $normalized;
+        }
+        if (null === $name || '' === $name) {
+            return array($email);
+        }
+        return array($name => $email);
+    }
+
+    /**
      * Adds To-header and recipient, $email can be an array, or a single string address
      *
      * @param  string|array $email
@@ -570,12 +596,10 @@ class Postman_Zend_Mail extends Postman_Zend_Mime_Message
      */
     public function addTo($email, $name='')
     {
-        if (!is_array($email)) {
-            $email = array($name => $email);
-        }
+        $email = $this->_normalizeRecipientList($email, $name);
 
         foreach ($email as $n => $recipient) {
-            $this->_addRecipientAndHeader('To', $recipient, is_int($n) ? '' : $n);
+            $this->_addRecipientAndHeader('To', $recipient, ( is_int( $n ) || null === $n ) ? '' : (string) $n);
             $this->_to[] = $recipient;
         }
 
@@ -591,12 +615,10 @@ class Postman_Zend_Mail extends Postman_Zend_Mime_Message
      */
     public function addCc($email, $name='')
     {
-        if (!is_array($email)) {
-            $email = array($name => $email);
-        }
+        $email = $this->_normalizeRecipientList($email, $name);
 
         foreach ($email as $n => $recipient) {
-            $this->_addRecipientAndHeader('Cc', $recipient, is_int($n) ? '' : $n);
+            $this->_addRecipientAndHeader('Cc', $recipient, ( is_int( $n ) || null === $n ) ? '' : (string) $n);
         }
 
         return $this;

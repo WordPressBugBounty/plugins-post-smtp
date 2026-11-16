@@ -37,8 +37,24 @@ if ( ! class_exists( 'PostmanEmailReportSending' ) ) :
 		 */
 		public function __construct() {
 			add_action( 'init', array( $this, 'schedule_email_reporting' ) );
+			add_action( 'init', array( $this, 'disable_legacy_extension_footer_reports' ), 100 );
 			add_action( 'postman_rat_email_report', array( $this,  'handle_email_reporting' ) );
 			add_filter( 'cron_schedules', array( $this, 'add_monthly_schedule' ) );
+		}
+
+		/**
+		 * The Report and Tracking extension still hooks wp_footer and sends a legacy HTML summary.
+		 * Lite/core reporting uses PostmanReportTemplate for daily, weekly, and monthly via cron.
+		 *
+		 * @since 4.0.3
+		 */
+		public function disable_legacy_extension_footer_reports() {
+			if ( ! class_exists( 'Post_SMTP_RAT_Email_Report' ) ) {
+				return;
+			}
+
+			$legacy_report = Post_SMTP_RAT_Email_Report::get_instance();
+			remove_action( 'wp_footer', array( $legacy_report, 'send_report' ) );
 		}
 
 
@@ -53,21 +69,38 @@ if ( ! class_exists( 'PostmanEmailReportSending' ) ) :
 		 * @version 3.0.1
 		 */
 		public function schedule_email_reporting() {
-			$options = get_option( 'postman_rat', array() );
-			if ( isset( $options['enable_email_reporting'] ) && $options['enable_email_reporting'] ) {
-				$schedules = array(
-					'd' => 'daily',
-					'w' => 'weekly',
-					'm' => 'monthly',
-				);
+			$options   = get_option( 'postman_rat', array() );
+			$timestamp = wp_next_scheduled( 'postman_rat_email_report' );
 
-				if ( isset( $options['reporting_interval'] ) && isset( $schedules[ $options['reporting_interval'] ] ) ) {
-					$schedule = $schedules[ $options['reporting_interval'] ];
-
-					if ( ! wp_next_scheduled( 'postman_rat_email_report' ) ) {
-						wp_schedule_event( current_time( 'timestamp' ), $schedule, 'postman_rat_email_report' );
-					}
+			if ( empty( $options['enable_email_reporting'] ) ) {
+				if ( $timestamp ) {
+					wp_clear_scheduled_hook( 'postman_rat_email_report' );
 				}
+				return;
+			}
+
+			$schedules = array(
+				'd' => 'daily',
+				'w' => 'weekly',
+				'm' => 'monthly',
+			);
+
+			if ( ! isset( $options['reporting_interval'] ) || ! isset( $schedules[ $options['reporting_interval'] ] ) ) {
+				return;
+			}
+
+			$schedule = $schedules[ $options['reporting_interval'] ];
+
+			if ( $timestamp ) {
+				$current_schedule = wp_get_schedule( 'postman_rat_email_report' );
+				if ( $current_schedule !== $schedule ) {
+					wp_clear_scheduled_hook( 'postman_rat_email_report' );
+					$timestamp = false;
+				}
+			}
+
+			if ( ! $timestamp ) {
+				wp_schedule_event( current_time( 'timestamp' ), $schedule, 'postman_rat_email_report' );
 			}
 		}
 
@@ -131,14 +164,9 @@ if ( ! class_exists( 'PostmanEmailReportSending' ) ) :
 			}
 			$ps_query = new PostmanEmailQueryLog();
 
-			$where_clauses = array();
-			if ( ! empty( $from ) && ! empty( $to ) ) {
-				$where_clauses[] = "pl.time >= {$from} AND pl.time <= {$to}";
-			}
-			$where_clauses[] = "( pl.original_subject NOT LIKE '%Post SMTP email error%' )";
-			$where = ' WHERE ' . implode( ' AND ', $where_clauses );
+			global $wpdb;
 
-			$query = "SELECT pl.original_subject AS subject, COUNT( pl.original_subject ) AS total, 
+			$query_select = "SELECT pl.original_subject AS subject, COUNT( pl.original_subject ) AS total, 
 				SUM( pl.success = 1 OR pl.success = 'Sent ( ** Fallback ** )' ) As sent, 
 				SUM( pl.success != 1 AND pl.success != 'Sent ( ** Fallback ** )' ) As failed 
 				FROM {$ps_query->table} AS pl";
@@ -149,13 +177,27 @@ if ( ! class_exists( 'PostmanEmailReportSending' ) ) :
 			 * @since 2.9.0
 			 * @version 1.0.0
 			 */
-			$query = apply_filters( 'postman_health_count', $query );
+			$query_select = apply_filters( 'postman_health_count', $query_select );
 
-			$query .= "{$where} GROUP BY pl.original_subject ORDER BY total DESC";
-			$query .= ! empty( $limit ) ? " LIMIT {$limit}" : '';
+			$query_sql    = $query_select . ' WHERE ( pl.original_subject NOT LIKE %s )';
+			$prepare_args = array( '%Post SMTP email error%' );
 
-			global $wpdb;
-			$response = $wpdb->get_results( $query );
+			if ( ! empty( $from ) && ! empty( $to ) ) {
+				$query_sql     .= ' AND pl.time >= %d AND pl.time <= %d';
+				$prepare_args[] = (int) $from;
+				$prepare_args[] = (int) $to;
+			}
+
+			$query_sql .= ' GROUP BY pl.original_subject ORDER BY total DESC';
+
+			if ( ! empty( $limit ) ) {
+				$query_sql     .= ' LIMIT %d';
+				$prepare_args[] = (int) $limit;
+			}
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Placeholders are filled via prepare() on the next line.
+			$prepared_query = $wpdb->prepare( $query_sql, ...$prepare_args );
+			$response       = $wpdb->get_results( $prepared_query );
 
 			return $response ? $response : false;
 		}

@@ -3,8 +3,8 @@ Plugin URI: https://postmansmtp.com/
 Contributors: wpexpertsio
 Tags: smtp, wordpress smtp, email logs, gmail smtp, office 365
 Requires at least: 5.6.0
-Tested up to: 7.1.2
-Stable tag: 4.0.2
+Tested up to: 7.1.4
+Stable tag: 4.0.3
 Requires PHP: 7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -367,6 +367,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 Important: If you are using version 2.8.7 or lower of our plugin, please update to the latest version as soon as possible. This update contains an urgent security fix that prevents potential vulnerabilities and attacks. We apologize for any inconvenience this may cause you and we appreciate your cooperation. Thank you for using our plugin.
 
 == Changelog ==
+
+= 4.0.3 - Nov 16, 2026 =
+* FIX - Fixed SMTP2GO API email formatting that caused valid emails to be rejected by the API.
+* FIX - Fixed cases where Post SMTP reported an email as failed even though it was successfully sent.
+* UPDATED - Updated the Freemius SDK to the latest supported version.
+* FIX - Prevented `wizard.js` from blocking the Enter key in code editors, including the Enfold theme code view.
+* IMPROVEMENT - Added PHP 8.5 compatibility by resolving deprecated boolean casts in the bundled Zend library.
+* FIX - Resolved conflicts caused by the bundled HTMLPurifier 4.18 overriding newer HTMLPurifier versions used by other WordPress plugins.
 
 = 4.0.2 - Sep 24, 2026 =
 * Security - Resolved Stored DOM-Based Cross-Site Scripting (XSS) vulnerability in failed email logs on WordPress Multisite.
