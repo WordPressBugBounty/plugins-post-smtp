@@ -2,7 +2,10 @@
 
 All notable changes to this plugin are documented in this file.
 
-= 4.0.3 - Nov 16, 2026 =
+= 4.0.4 - Nov 18, 2026 =
+* FIX - Fixed login issues affecting non-administrator roles after updating to version 4.0.3.
+
+= 4.0.3 - Nov 10, 2026 =
 * FIX - Fixed SMTP2GO API email formatting that caused valid emails to be rejected by the API.
 * FIX - Fixed cases where Post SMTP reported an email as failed even though it was successfully sent.
 * UPDATED - Updated the Freemius SDK to the latest supported version.
